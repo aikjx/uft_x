@@ -1,99 +1,45 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import router from './router'
-import App from './App.vue'
 
-// Styles
+import App from './App.vue'
+import router from './router'
 import './style.css'
 
-// Naive UI
-import {
-  create,
-  NButton,
-  NCard,
-  NLayout,
-  NLayoutHeader,
-  NLayoutContent,
-  NLayoutSider,
-  NMenu,
-  NSlider,
-  NInputNumber,
-  NSwitch,
-  NSelect,
-  NSpace,
-  NGrid,
-  NGridItem,
-  NTooltip,
-  NProgress,
-  NTabs,
-  NTabPane,
-  NCollapse,
-  NCollapseItem,
-  NDrawer,
-  NDrawerContent,
-  NIcon,
-  NPopover,
-  NTag,
-  NBadge,
-  NAlert,
-  NModal,
-  NConfigProvider,
-  darkTheme,
-  lightTheme
-} from 'naive-ui'
+// 添加 MathJax 配置
+declare global {
+  interface Window {
+    MathJax: any
+  }
+}
 
-const naive = create({
-  components: [
-    NButton,
-    NCard,
-    NLayout,
-    NLayoutHeader,
-    NLayoutContent,
-    NLayoutSider,
-    NMenu,
-    NSlider,
-    NInputNumber,
-    NSwitch,
-    NSelect,
-    NSpace,
-    NGrid,
-    NGridItem,
-    NTooltip,
-    NProgress,
-    NTabs,
-    NTabPane,
-    NCollapse,
-    NCollapseItem,
-    NDrawer,
-    NDrawerContent,
-    NIcon,
-    NPopover,
-    NTag,
-    NBadge,
-    NAlert,
-    NModal,
-    NConfigProvider
-  ]
-})
+// 配置 MathJax
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true,
+    processEnvironments: true
+  },
+  options: {
+    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+  }
+}
+
+// 动态加载 MathJax
+const script = document.createElement('script')
+script.src = 'https://polyfill.io/v3/polyfill.min.js?features=es6'
+document.head.appendChild(script)
+
+const mathJaxScript = document.createElement('script')
+mathJaxScript.id = 'MathJax-script'
+mathJaxScript.async = true
+mathJaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+document.head.appendChild(mathJaxScript)
 
 const app = createApp(App)
-const pinia = createPinia()
 
-app.use(pinia)
+app.use(createPinia())
 app.use(router)
-app.use(naive)
 
-// Global properties
-app.config.globalProperties.$darkTheme = darkTheme
-app.config.globalProperties.$lightTheme = lightTheme
 
-// Hide loading screen after app is mounted
-app.mount('#app').$nextTick(() => {
-  const loadingScreen = document.getElementById('loading-screen')
-  if (loadingScreen) {
-    loadingScreen.style.opacity = '0'
-    setTimeout(() => {
-      loadingScreen.remove()
-    }, 500)
-  }
-})
+app.mount('#app')

@@ -1,55 +1,70 @@
 <template>
-  <n-config-provider :theme="isDark ? darkTheme : lightTheme">
-    <div id="app" :class="{ 'dark': isDark }">
-      <AppLayout />
-    </div>
-  </n-config-provider>
+  <AppLayout>
+    <router-view />
+  </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { darkTheme, lightTheme } from 'naive-ui'
-import { useThemeStore } from '@/stores/theme'
-import AppLayout from '@/components/Layout/AppLayout.vue'
-
-const themeStore = useThemeStore()
-const isDark = computed(() => themeStore.isDark)
+import AppLayout from './components/Layout/AppLayout.vue'
 </script>
 
 <style>
 #app {
-  min-height: 100vh;
-  transition: all 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 全局滚动条样式 */
+/* 全局样式 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* MathJax 样式优化 */
+.MathJax {
+  outline: none;
+}
+
+.MathJax_Display {
+  text-align: center !important;
+  margin: 1em 0 !important;
+}
+
+/* 滚动条样式 */
 ::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.3);
+  background: #c1c1c1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: #a8a8a8;
 }
 
-.dark ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+/* 暗色模式滚动条 */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: #2d3748;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #4a5568;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #718096;
+  }
 }
 </style>

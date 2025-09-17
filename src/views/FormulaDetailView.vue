@@ -1,626 +1,240 @@
 <template>
-  <div class="formula-detail-view">
-    <div class="container">
-      <!-- 加载状态 -->
-      <div v-if="loading" class="loading-state">
-        <n-spin size="large">
-          <template #description>
-            正在加载公式详情...
-          </template>
-        </n-spin>
-      </div>
-      
-      <!-- 公式详情 -->
-      <div v-else-if="formula" class="formula-detail">
-        <!-- 头部信息 -->
-        <div class="formula-header">
-          <div class="breadcrumb">
-            <router-link to="/formulas">公式列表</router-link>
-            <span class="separator">></span>
-            <span class="current">{{ formula.name }}</span>
-          </div>
-          
-          <div class="formula-meta">
-            <div class="category-badge">
-              {{ getCategoryName(formula.categoryId) }}
-            </div>
-            <n-tag :type="getDifficultyType(formula.difficulty)" size="medium">
-              {{ getDifficultyLabel(formula.difficulty) }}
-            </n-tag>
-          </div>
-        </div>
-        
-        <!-- 主要内容 -->
-        <div class="formula-content">
-          <div class="content-left">
-            <!-- 公式标题和描述 -->
-            <div class="formula-info">
-              <h1 class="formula-title">{{ formula.name }}</h1>
-              <p class="formula-description">{{ formula.description }}</p>
-              
-              <!-- 公式方程 -->
-              <div class="formula-equation">
-                <div class="math-formula">
-                  {{ formula.equation }}
-                </div>
-              </div>
-            </div>
-            
-            <!-- 3D可视化区域 -->
-            <div class="visualization-container">
-              <div class="visualization-header">
-                <h3>3D可视化</h3>
-                <div class="visualization-controls">
-                  <n-button-group>
-                    <n-button 
-                      :type="isPlaying ? 'primary' : 'default'"
-                      @click="toggleAnimation"
-                    >
-                      {{ isPlaying ? '暂停' : '播放' }}
-                    </n-button>
-                    <n-button @click="resetView">重置视角</n-button>
-                  </n-button-group>
-                </div>
-              </div>
-              
-              <div class="scene-container" ref="sceneContainer">
-                <!-- Three.js场景将在这里渲染 -->
-                <div class="scene-placeholder">
-                  <div class="placeholder-content">
-                    <div class="placeholder-icon">🌌</div>
-                    <p>3D可视化场景</p>
-                    <small>{{ formula.name }}</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- 右侧控制面板 -->
-          <div class="content-right">
-            <div class="control-panel">
-              <h3>参数控制</h3>
-              
-              <div class="parameter-controls">
-                <div 
-                  v-for="param in formula.parameters" 
-                  :key="param.name"
-                  class="parameter-group"
-                >
-                  <label class="parameter-label">
-                    {{ param.name }} ({{ param.symbol }})
-                  </label>
-                  <p class="parameter-description">{{ param.description }}</p>
-                  
-                  <div class="parameter-input">
-                    <n-slider
-                      v-if="param.type === 'slider'"
-                      v-model:value="parameterValues[param.symbol]"
-                      :min="param.min"
-                      :max="param.max"
-                      :step="param.step"
-                      :tooltip="false"
-                    />
-                    <n-input-number
-                      v-else
-                      v-model:value="parameterValues[param.symbol]"
-                      :min="param.min"
-                      :max="param.max"
-                      :step="param.step"
-                      size="small"
-                    />
-                  </div>
-                  
-                  <div class="parameter-value">
-                    当前值: {{ parameterValues[param.symbol] }}
-                    <span v-if="param.unit" class="unit">{{ param.unit }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- 理论背景 -->
-            <div class="theory-panel">
-              <h3>理论背景</h3>
-              <div class="theory-content">
-                <div class="theory-section">
-                  <h4>背景介绍</h4>
-                  <p>{{ formula.theory.background }}</p>
-                </div>
-                
-                <div class="theory-section">
-                  <h4>重要意义</h4>
-                  <p>{{ formula.theory.significance }}</p>
-                </div>
-                
-                <div class="theory-section">
-                  <h4>应用领域</h4>
-                  <ul class="applications-list">
-                    <li v-for="app in formula.theory.applications" :key="app">
-                      {{ app }}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 示例和参考资料 -->
-        <div class="formula-extras">
-          <div class="examples-section">
-            <h3>应用示例</h3>
-            <div class="examples-grid">
-              <div 
-                v-for="example in formula.examples" 
-                :key="example.title"
-                class="example-card"
-              >
-                <h4>{{ example.title }}</h4>
-                <p>{{ example.description }}</p>
-                <div class="example-result">
-                  <strong>预期结果:</strong> {{ example.expectedResult }}
-                </div>
-                <p class="example-explanation">{{ example.explanation }}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div class="references-section">
-            <h3>参考资料</h3>
-            <div class="references-list">
-              <div 
-                v-for="ref in formula.references" 
-                :key="ref.title"
-                class="reference-item"
-              >
-                <div class="reference-title">{{ ref.title }}</div>
-                <div class="reference-author">{{ ref.author }} ({{ ref.year }})</div>
-                <div class="reference-type">{{ getRefTypeLabel(ref.type) }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 导航按钮 -->
-        <div class="navigation-buttons">
-          <n-button 
-            v-if="previousFormula"
-            @click="navigateToFormula(previousFormula.id)"
-            class="nav-button"
+  <div class="formula-detail-view" v-if="formula">
+    <motion.div
+      :initial="{ opacity: 0, y: 20 }"
+      :animate="{ opacity: 1, y: 0 }"
+      :transition="{ duration: 0.6 }"
+      class="detail-container"
+    >
+      <div class="detail-header">
+        <router-link to="/" class="back-btn">
+          <motion.div
+            :whileHover="{ scale: 1.1 }"
+            :whileTap="{ scale: 0.9 }"
           >
-            ← {{ previousFormula.name }}
-          </n-button>
-          
-          <n-button 
-            v-if="nextFormula"
-            @click="navigateToFormula(nextFormula.id)"
-            class="nav-button"
-            type="primary"
-          >
-            {{ nextFormula.name }} →
-          </n-button>
+            ← 返回公式列表
+          </motion.div>
+        </router-link>
+        
+        <div class="formula-info">
+          <div class="formula-number" :style="{ backgroundColor: formula.color }">
+            {{ formula.id }}
+          </div>
+          <div>
+            <h1 class="formula-title">{{ formula.name }}</h1>
+            <span class="formula-category" :style="{ color: formula.color }">
+              {{ formula.category }}
+            </span>
+          </div>
         </div>
       </div>
-      
-      <!-- 错误状态 -->
-      <div v-else class="error-state">
-        <div class="error-content">
-          <div class="error-icon">❌</div>
-          <h3>公式未找到</h3>
-          <p>您访问的公式不存在或已被删除</p>
-          <n-button @click="$router.push('/formulas')">
-            返回公式列表
-          </n-button>
+
+      <motion.div
+        :initial="{ y: 30, opacity: 0 }"
+        :animate="{ y: 0, opacity: 1 }"
+        :transition="{ delay: 0.3, duration: 0.6 }"
+        class="formula-content"
+      >
+        <div class="formula-latex-display" ref="latexRef">
+          $${{ formula.latex }}$$
         </div>
-      </div>
-    </div>
+        
+        <div class="content-sections">
+          <section class="description-section">
+            <h2>公式说明</h2>
+            <p>{{ formula.description }}</p>
+          </section>
+
+          <section class="parameters-section">
+            <h2>参数说明</h2>
+            <div class="parameters-list">
+              <div v-for="param in getParameters(formula.id)" :key="param.symbol" class="parameter-item">
+                <span class="param-symbol" v-html="param.symbol"></span>
+                <span class="param-description">{{ param.description }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="applications-section">
+            <h2>物理意义</h2>
+            <p>{{ getPhysicalMeaning(formula.id) }}</p>
+          </section>
+
+          <section class="related-section">
+            <h2>相关公式</h2>
+            <div class="related-formulas">
+              <router-link
+                v-for="relatedId in getRelatedFormulas(formula.id)"
+                :key="relatedId"
+                :to="`/formula/${relatedId}`"
+                class="related-formula-link"
+              >
+                公式 {{ relatedId }}
+              </router-link>
+            </div>
+          </section>
+        </div>
+      </motion.div>
+    </motion.div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useFormulasStore } from '@/stores/formulas'
-import type { Formula } from '@/types/formula'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
+
+import { formulas } from '../data/formulas'
 
 const route = useRoute()
-const router = useRouter()
-const formulasStore = useFormulasStore()
+const latexRef = ref<HTMLElement>()
 
-// 响应式数据
-const loading = ref(true)
-const isPlaying = ref(false)
-const sceneContainer = ref<HTMLElement>()
-const parameterValues = ref<Record<string, number>>({})
-
-// 计算属性
 const formula = computed(() => {
-  const id = route.params.id as string
-  return formulasStore.getFormulaById(id)
+  const id = parseInt(route.params.id as string)
+  return formulas.find(f => f.id === id)
 })
 
-const previousFormula = computed(() => {
-  if (!formula.value) return null
-  return formulasStore.getPreviousFormula(formula.value.id)
-})
-
-const nextFormula = computed(() => {
-  if (!formula.value) return null
-  return formulasStore.getNextFormula(formula.value.id)
-})
-
-// 方法
-const getCategoryName = (categoryId: string) => {
-  const category = formulasStore.categories.find(cat => cat.id === categoryId)
-  return category?.name || '未知分类'
-}
-
-const getDifficultyType = (difficulty: string) => {
-  const types: Record<string, any> = {
-    'beginner': 'success',
-    'intermediate': 'warning',
-    'advanced': 'error'
-  }
-  return types[difficulty] || 'default'
-}
-
-const getDifficultyLabel = (difficulty: string) => {
-  const labels: Record<string, string> = {
-    'beginner': '初级',
-    'intermediate': '中级',
-    'advanced': '高级'
-  }
-  return labels[difficulty] || difficulty
-}
-
-const getRefTypeLabel = (type: string) => {
-  const labels: Record<string, string> = {
-    'paper': '论文',
-    'book': '书籍',
-    'website': '网站',
-    'video': '视频'
-  }
-  return labels[type] || type
-}
-
-const toggleAnimation = () => {
-  isPlaying.value = !isPlaying.value
-  // TODO: 控制Three.js动画
-}
-
-const resetView = () => {
-  // TODO: 重置Three.js相机视角
-}
-
-const navigateToFormula = (formulaId: string) => {
-  router.push(`/formula/${formulaId}`)
-}
-
-// 初始化参数值
-const initParameterValues = () => {
-  if (formula.value) {
-    formula.value.parameters.forEach(param => {
-      parameterValues.value[param.symbol] = param.defaultValue
-    })
-  }
-}
-
-// 生命周期
 onMounted(async () => {
-  await formulasStore.initFormulas()
-  
-  if (formula.value) {
-    initParameterValues()
-    // TODO: 初始化Three.js场景
+  await nextTick()
+  if (latexRef.value && window.MathJax) {
+    window.MathJax.typesetPromise([latexRef.value])
   }
-  
-  loading.value = false
 })
 
-// 监听参数变化
-watch(parameterValues, () => {
-  // TODO: 更新Three.js场景参数
-}, { deep: true })
+const getParameters = (formulaId: number) => {
+  const parameterMap: Record<number, Array<{symbol: string, description: string}>> = {
+    1: [
+      { symbol: '\\(\\vec{r}(t)\\)', description: '位置矢量，描述物体在时空中的位置' },
+      { symbol: '\\(\\vec{C}\\)', description: '光速矢量，表示光在真空中的传播速度' },
+      { symbol: '\\(t\\)', description: '时间参数' },
+      { symbol: '\\(x,y,z\\)', description: '三维空间坐标' }
+    ],
+    2: [
+      { symbol: '\\(r\\)', description: '螺旋运动的半径' },
+      { symbol: '\\(\\omega\\)', description: '角频率，描述旋转的快慢' },
+      { symbol: '\\(h\\)', description: '螺距参数，控制螺旋的紧密程度' }
+    ],
+    3: [
+      { symbol: '\\(m\\)', description: '物体的质量' },
+      { symbol: '\\(k\\)', description: '比例常数' },
+      { symbol: '\\(n\\)', description: '空间密度' },
+      { symbol: '\\(\\Omega\\)', description: '立体角' }
+    ]
+  }
+  
+  return parameterMap[formulaId] || []
+}
+
+const getPhysicalMeaning = (formulaId: number) => {
+  const meanings: Record<number, string> = {
+    1: '这个方程揭示了时间和空间的统一性，表明时空是一个整体，物体的运动轨迹可以用光速和时间的乘积来描述。',
+    2: '描述了物质在三维空间中的螺旋运动模式，这种运动形式在宇宙中普遍存在，从微观粒子到宏观天体都遵循这一规律。',
+    3: '重新定义了质量的概念，将质量与空间密度的变化率联系起来，为理解物质的本质提供了新的视角。'
+  }
+  
+  return meanings[formulaId] || '这个公式在统一场论中具有重要的理论意义。'
+}
+
+const getRelatedFormulas = (formulaId: number) => {
+  const relations: Record<number, number[]> = {
+    1: [2, 7],
+    2: [1, 8],
+    3: [4, 5, 6],
+    4: [3, 12, 14],
+    5: [3, 6],
+    6: [5, 7],
+    7: [1, 6, 16],
+    8: [2, 12],
+    9: [10, 11],
+    10: [9, 11, 14],
+    11: [9, 10, 15],
+    12: [4, 8, 13, 14],
+    13: [11, 12],
+    14: [4, 10, 12],
+    15: [11, 14],
+    16: [7, 17],
+    17: [16]
+  }
+  
+  return relations[formulaId] || []
+}
 </script>
 
 <style scoped>
 .formula-detail-view {
-  min-height: 100vh;
-  padding: 2rem 0;
-  background: linear-gradient(135deg, var(--color-space) 0%, var(--color-field) 100%);
+  @apply min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800;
 }
 
-.loading-state,
-.error-state {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
+.detail-container {
+  @apply max-w-4xl mx-auto px-4 py-8;
 }
 
-.error-content {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.8);
+.detail-header {
+  @apply mb-8;
 }
 
-.error-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.formula-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background: var(--glass-effect);
-  border-radius: 1rem;
-}
-
-.breadcrumb {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.breadcrumb a {
-  color: var(--color-primary);
-  text-decoration: none;
-}
-
-.separator {
-  margin: 0 0.5rem;
-}
-
-.formula-meta {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.category-badge {
-  padding: 0.25rem 0.75rem;
-  background: var(--color-primary);
-  color: white;
-  border-radius: 1rem;
-  font-size: 0.9rem;
-}
-
-.formula-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  margin-bottom: 3rem;
+.back-btn {
+  @apply inline-block mb-6 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+         font-medium transition-colors;
 }
 
 .formula-info {
-  margin-bottom: 2rem;
+  @apply flex items-center gap-6;
+}
+
+.formula-number {
+  @apply w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl;
 }
 
 .formula-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 1rem;
+  @apply text-3xl font-bold text-gray-900 dark:text-white mb-2;
 }
 
-.formula-description {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.6;
-  margin-bottom: 2rem;
+.formula-category {
+  @apply text-lg font-medium;
 }
 
-.formula-equation {
-  text-align: center;
-  margin: 2rem 0;
+.formula-latex-display {
+  @apply text-center py-12 px-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg mb-8 text-2xl;
 }
 
-.visualization-container {
-  background: var(--glass-effect);
-  border-radius: 1rem;
-  padding: 1.5rem;
+.content-sections {
+  @apply space-y-8;
 }
 
-.visualization-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+.content-sections section {
+  @apply bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg;
 }
 
-.visualization-header h3 {
-  color: var(--color-primary);
-  margin: 0;
+.content-sections h2 {
+  @apply text-xl font-bold text-gray-900 dark:text-white mb-4;
 }
 
-.scene-container {
-  height: 400px;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.3);
-  position: relative;
+.content-sections p {
+  @apply text-gray-700 dark:text-gray-300 leading-relaxed;
 }
 
-.scene-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
+.parameters-list {
+  @apply space-y-3;
 }
 
-.placeholder-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.parameter-item {
+  @apply flex items-start gap-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg;
 }
 
-.control-panel,
-.theory-panel {
-  background: var(--glass-effect);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+.param-symbol {
+  @apply font-mono text-blue-600 dark:text-blue-400 min-w-24 flex-shrink-0;
 }
 
-.control-panel h3,
-.theory-panel h3 {
-  color: var(--color-primary);
-  margin-bottom: 1rem;
+.param-description {
+  @apply text-gray-700 dark:text-gray-300;
 }
 
-.parameter-group {
-  margin-bottom: 1.5rem;
+.related-formulas {
+  @apply flex flex-wrap gap-2;
 }
 
-.parameter-label {
-  display: block;
-  font-weight: 600;
-  color: white;
-  margin-bottom: 0.5rem;
-}
-
-.parameter-description {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 0.75rem;
-}
-
-.parameter-input {
-  margin-bottom: 0.5rem;
-}
-
-.parameter-value {
-  font-size: 0.9rem;
-  color: var(--color-primary);
-}
-
-.unit {
-  color: rgba(255, 255, 255, 0.6);
-  margin-left: 0.25rem;
-}
-
-.theory-section {
-  margin-bottom: 1.5rem;
-}
-
-.theory-section h4 {
-  color: var(--color-accent);
-  margin-bottom: 0.5rem;
-}
-
-.applications-list {
-  list-style: none;
-  padding: 0;
-}
-
-.applications-list li {
-  padding: 0.25rem 0;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.applications-list li::before {
-  content: "→";
-  color: var(--color-primary);
-  margin-right: 0.5rem;
-}
-
-.formula-extras {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-.examples-section,
-.references-section {
-  background: var(--glass-effect);
-  border-radius: 1rem;
-  padding: 1.5rem;
-}
-
-.examples-section h3,
-.references-section h3 {
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-}
-
-.example-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.example-card h4 {
-  color: var(--color-accent);
-  margin-bottom: 0.5rem;
-}
-
-.example-result {
-  background: rgba(59, 130, 246, 0.1);
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  margin: 0.5rem 0;
-  border-left: 3px solid var(--color-primary);
-}
-
-.reference-item {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.reference-title {
-  font-weight: 600;
-  color: white;
-  margin-bottom: 0.25rem;
-}
-
-.reference-author {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-}
-
-.reference-type {
-  color: var(--color-primary);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-}
-
-.navigation-buttons {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.nav-button {
-  flex: 1;
-  max-width: 300px;
-}
-
-/* 响应式设计 */
-@media (max-width: 1024px) {
-  .formula-content {
-    grid-template-columns: 1fr;
-  }
-  
-  .formula-extras {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .formula-header {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
-  .formula-title {
-    font-size: 2rem;
-  }
-  
-  .navigation-buttons {
-    flex-direction: column;
-  }
+.related-formula-link {
+  @apply px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 
+         rounded-full text-sm hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors;
 }
 </style>
