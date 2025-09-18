@@ -1,1521 +1,1823 @@
 <template>
-  <div class="relationships-view">
-    <!-- 头部区域 -->
-    <div class="view-header animate-fade-in">
-      <h1 class="view-title">公式关系图谱</h1>
-      <p class="view-subtitle">探索统一场论公式之间的内在联系与演化路径</p>
-      
-      <!-- 统计信息 -->
-      <div class="stats-bar">
-        <div class="stat-item">
-          <span class="stat-number">{{ filteredNodes.length }}</span>
-          <span class="stat-label">公式节点</span>
+  <div class="spacetime-network">
+    <!-- 时空关系网络头部 -->
+    <div class="header-section">
+      <div class="cosmic-background">
+        <div class="star-field">
+          <div class="star" v-for="n in 100" :key="n" :style="getStarStyle()"></div>
         </div>
-        <div class="stat-item">
-          <span class="stat-number">{{ filteredLinks.length }}</span>
-          <span class="stat-label">关系连接</span>
+        <div class="cosmic-web">
+          <div class="web-strand" v-for="n in 20" :key="n" :style="getWebStrandStyle()"></div>
         </div>
-        <div class="stat-item">
-          <span class="stat-number">{{ categories.length }}</span>
-          <span class="stat-label">理论分类</span>
+        <div class="energy-vortex">
+          <div class="vortex-ring" v-for="n in 5" :key="n" :style="getVortexStyle(n)"></div>
         </div>
       </div>
-    </div>
-
-    <div class="graph-container">
-      <!-- 关系图可视化区域 -->
-      <div class="graph-section animate-scale-in">
-        <!-- 工具栏 -->
-        <div class="graph-toolbar">
-          <div class="toolbar-group">
-            <button
-              @click="zoomIn"
-              class="toolbar-btn"
-              title="放大"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-              </svg>
-            </button>
-            <button
-              @click="zoomOut"
-              class="toolbar-btn"
-              title="缩小"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-              </svg>
-            </button>
-            <button
-              @click="fitToScreen"
-              class="toolbar-btn"
-              title="适应屏幕"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
-              </svg>
-            </button>
+      <div class="header-content">
+        <h1 class="page-title">
+          <span class="title-icon">🌌</span>
+          时空关系网络
+        </h1>
+        <p class="page-subtitle">
+          探索人工场之间的时空连接 · 揭示宇宙的隐秘结构 · 构建星际知识图谱
+        </p>
+        
+        <!-- 网络控制面板 -->
+        <div class="control-panel">
+          <div class="panel-section">
+            <h3 class="panel-title">
+              <span class="panel-icon">🎛️</span>
+              网络控制
+            </h3>
+            <div class="control-buttons">
+              <button
+                v-for="mode in visualModes"
+                :key="mode.id"
+                :class="['control-btn', { active: currentMode === mode.id }]"
+                @click="setVisualizationMode(mode.id)"
+              >
+                <span class="btn-icon">{{ mode.icon }}</span>
+                <span class="btn-text">{{ mode.name }}</span>
+              </button>
+            </div>
           </div>
           
-          <div class="toolbar-group">
-            <button
-              @click="togglePhysics"
-              class="toolbar-btn"
-              :class="{ active: physicsEnabled }"
-              title="切换物理引擎"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-            </button>
-            <button
-              @click="toggleLabels"
-              class="toolbar-btn"
-              :class="{ active: showLabels }"
-              title="显示/隐藏标签"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- 图形画布 -->
-        <div class="graph-canvas" ref="graphContainer">
-          <!-- 加载状态 -->
-          <div v-if="isLoading" class="loading-overlay">
-            <div class="loading-spinner"></div>
-            <p class="loading-text">正在构建关系图谱...</p>
-          </div>
-        </div>
-
-        <!-- 图例 -->
-        <div class="graph-legend">
-          <h4 class="legend-title">图例说明</h4>
-          <div class="legend-items">
-            <div class="legend-item">
-              <div class="legend-node" style="background: #3B82F6;"></div>
-              <span>时空理论</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-node" style="background: #10B981;"></div>
-              <span>力学基础</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-node" style="background: #F59E0B;"></div>
-              <span>统一理论</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-node" style="background: #EF4444;"></div>
-              <span>电磁理论</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-node" style="background: #8B5CF6;"></div>
-              <span>应用理论</span>
+          <div class="panel-section">
+            <h3 class="panel-title">
+              <span class="panel-icon">🔍</span>
+              探索工具
+            </h3>
+            <div class="tool-controls">
+              <div class="slider-control">
+                <label class="slider-label">时空深度</label>
+                <input
+                  type="range"
+                  v-model="spaceTimeDepth"
+                  min="1"
+                  max="10"
+                  class="cosmic-slider"
+                />
+                <span class="slider-value">{{ spaceTimeDepth }}</span>
+              </div>
+              <div class="slider-control">
+                <label class="slider-label">连接强度</label>
+                <input
+                  type="range"
+                  v-model="connectionStrength"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  class="cosmic-slider"
+                />
+                <span class="slider-value">{{ connectionStrength }}</span>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- 控制面板 -->
-      <div class="control-panel animate-slide-in">
-        <!-- 分类筛选 -->
-        <div class="panel-section">
-          <h3 class="panel-title">
-            <svg class="inline w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-            </svg>
-            分类筛选
-          </h3>
-          <div class="category-filters">
-            <button
-              @click="filterByCategory('')"
-              class="category-btn hover-scale"
-              :class="{ active: selectedCategory === '' }"
-            >
-              <span class="category-count">{{ formulas.length }}</span>
-              全部显示
-            </button>
-            <button
-              v-for="category in categories"
-              :key="category.name"
-              @click="filterByCategory(category.name)"
-              class="category-btn hover-scale"
-              :class="{ active: selectedCategory === category.name }"
-              :style="{ 
-                borderColor: category.color,
-                backgroundColor: selectedCategory === category.name ? category.color : 'transparent',
-                color: selectedCategory === category.name ? 'white' : category.color
-              }"
-            >
-              <span class="category-count">{{ category.count }}</span>
-              {{ category.name }}
-            </button>
-          </div>
-        </div>
-
-        <!-- 搜索功能 -->
-        <div class="panel-section">
-          <h3 class="panel-title">
-            <svg class="inline w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-            搜索公式
-          </h3>
-          <div class="search-container">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="输入公式名称或描述..."
-              class="search-input"
-              @input="handleSearch"
-            >
-            <div v-if="searchResults.length > 0" class="search-results">
-              <div
-                v-for="result in searchResults"
-                :key="result.id"
-                @click="highlightNode(result)"
-                class="search-result-item hover-scale"
-              >
-                <div class="result-number" :style="{ backgroundColor: result.color }">
-                  {{ result.id }}
+          
+          <div class="panel-section">
+            <h3 class="panel-title">
+              <span class="panel-icon">📊</span>
+              网络统计
+            </h3>
+            <div class="network-stats">
+              <div class="stat-item">
+                <div class="stat-icon">🌟</div>
+                <div class="stat-info">
+                  <div class="stat-value">{{ networkStats.nodes }}</div>
+                  <div class="stat-label">节点数量</div>
                 </div>
-                <div class="result-content">
-                  <div class="result-name">{{ result.name }}</div>
-                  <div class="result-category">{{ result.category }}</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon">🔗</div>
+                <div class="stat-info">
+                  <div class="stat-value">{{ networkStats.connections }}</div>
+                  <div class="stat-label">连接数量</div>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-info">
+                  <div class="stat-value">{{ networkStats.energy }}</div>
+                  <div class="stat-label">网络能量</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- 布局控制 -->
-        <div class="panel-section">
-          <h3 class="panel-title">
-            <svg class="inline w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"/>
-            </svg>
-            布局设置
-          </h3>
-          <div class="layout-controls">
-            <div class="control-group">
-              <label class="control-label">节点大小</label>
-              <input
-                v-model="nodeSize"
-                type="range"
-                min="10"
-                max="40"
-                class="control-slider"
-                @input="updateNodeSize"
-              >
-              <span class="control-value">{{ nodeSize }}px</span>
-            </div>
-            <div class="control-group">
-              <label class="control-label">连线强度</label>
-              <input
-                v-model="linkStrength"
-                type="range"
-                min="0.1"
-                max="2"
-                step="0.1"
-                class="control-slider"
-                @input="updateLinkStrength"
-              >
-              <span class="control-value">{{ linkStrength }}</span>
-            </div>
-            <div class="control-group">
-              <label class="control-label">排斥力</label>
-              <input
-                v-model="chargeStrength"
-                type="range"
-                min="-1000"
-                max="-100"
-                step="50"
-                class="control-slider"
-                @input="updateChargeStrength"
-              >
-              <span class="control-value">{{ Math.abs(chargeStrength) }}</span>
-            </div>
+    <!-- 主要可视化区域 -->
+    <div class="visualization-area">
+      <div class="network-container">
+        <!-- 3D网络背景 -->
+        <div class="network-background">
+          <div class="dimension-grid">
+            <div class="grid-plane xy-plane"></div>
+            <div class="grid-plane xz-plane"></div>
+            <div class="grid-plane yz-plane"></div>
+          </div>
+          <div class="quantum-field">
+            <div class="field-particle" v-for="n in 50" :key="n" :style="getFieldParticleStyle()"></div>
           </div>
         </div>
-
-        <!-- 操作按钮 -->
-        <div class="panel-section">
-          <div class="action-buttons">
-            <button
-              @click="resetGraph"
-              class="action-btn primary hover-scale"
+        
+        <!-- SVG网络图 -->
+        <svg class="network-svg" ref="networkSvg" :width="svgDimensions.width" :height="svgDimensions.height">
+          <!-- 定义渐变和滤镜 -->
+          <defs>
+            <radialGradient id="nodeGradient" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" style="stop-color:#00f5ff;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#64ffda;stop-opacity:0.3" />
+            </radialGradient>
+            <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#00f5ff;stop-opacity:0.8" />
+              <stop offset="50%" style="stop-color:#64ffda;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#ff00ff;stop-opacity:0.8" />
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          
+          <!-- 连接线 -->
+          <g class="connections-group">
+            <line
+              v-for="connection in networkConnections"
+              :key="`${connection.source}-${connection.target}`"
+              :x1="getNodePosition(connection.source).x"
+              :y1="getNodePosition(connection.source).y"
+              :x2="getNodePosition(connection.target).x"
+              :y2="getNodePosition(connection.target).y"
+              :class="['connection-line', connection.type]"
+              :stroke-width="connection.strength * 3"
+              stroke="url(#connectionGradient)"
+              filter="url(#glow)"
+              @click="selectConnection(connection)"
             >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-              </svg>
-              重置视图
-            </button>
-            <button
-              @click="exportGraph"
-              class="action-btn secondary hover-scale"
+              <animate
+                attributeName="stroke-opacity"
+                values="0.3;1;0.3"
+                :dur="connection.animationSpeed + 's'"
+                repeatCount="indefinite"
+              />
+            </line>
+          </g>
+          
+          <!-- 节点 -->
+          <g class="nodes-group">
+            <g
+              v-for="node in networkNodes"
+              :key="node.id"
+              :class="['network-node', node.category, { selected: selectedNode?.id === node.id }]"
+              :transform="`translate(${getNodePosition(node.id).x}, ${getNodePosition(node.id).y})`"
+              @click="selectNode(node)"
+              @mouseenter="highlightNode(node)"
+              @mouseleave="unhighlightNode()"
             >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-              导出图片
-            </button>
-            <button
-              @click="toggleFullscreen"
-              class="action-btn secondary hover-scale"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
-              </svg>
-              全屏模式
-            </button>
+              <!-- 节点光环 -->
+              <circle
+                :r="node.size + 10"
+                fill="none"
+                :stroke="node.color"
+                stroke-width="2"
+                stroke-opacity="0.3"
+                class="node-halo"
+              >
+                <animate
+                  attributeName="r"
+                  :values="`${node.size + 5};${node.size + 15};${node.size + 5}`"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
+              </circle>
+              
+              <!-- 节点主体 -->
+              <circle
+                :r="node.size"
+                :fill="node.color"
+                filter="url(#glow)"
+                class="node-body"
+              />
+              
+              <!-- 节点图标 -->
+              <text
+                :font-size="node.size * 0.8"
+                text-anchor="middle"
+                dominant-baseline="central"
+                fill="#ffffff"
+                class="node-icon"
+              >
+                {{ node.icon }}
+              </text>
+              
+              <!-- 节点标签 -->
+              <text
+                :y="node.size + 20"
+                text-anchor="middle"
+                fill="#64ffda"
+                font-size="12"
+                class="node-label"
+              >
+                {{ node.name }}
+              </text>
+              
+              <!-- 能量脉冲 -->
+              <circle
+                :r="node.size"
+                fill="none"
+                :stroke="node.color"
+                stroke-width="2"
+                stroke-opacity="0"
+                class="energy-pulse"
+              >
+                <animate
+                  attributeName="r"
+                  :values="`${node.size};${node.size * 2}`"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="stroke-opacity"
+                  values="0.8;0"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
+              </circle>
+            </g>
+          </g>
+        </svg>
+        
+        <!-- 交互提示 -->
+        <div class="interaction-hints">
+          <div class="hint-item">
+            <span class="hint-icon">🖱️</span>
+            <span class="hint-text">点击节点查看详情</span>
+          </div>
+          <div class="hint-item">
+            <span class="hint-icon">🔗</span>
+            <span class="hint-text">点击连接线查看关系</span>
+          </div>
+          <div class="hint-item">
+            <span class="hint-icon">🌀</span>
+            <span class="hint-text">滚轮缩放网络</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 选中公式信息 -->
-    <Transition name="slide-up">
-      <div
-        v-if="selectedNode"
-        class="selected-info"
-      >
-        <div class="info-card">
-          <div class="info-header">
-            <div class="formula-number" :style="{ backgroundColor: selectedNode.color }">
-              {{ selectedNode.id }}
+    <!-- 节点详情面板 -->
+    <div v-if="selectedNode" class="node-details-panel">
+      <div class="panel-container">
+        <div class="panel-header">
+          <div class="node-info">
+            <div class="node-icon-large" :style="{ color: selectedNode.color }">
+              {{ selectedNode.icon }}
             </div>
-            <div class="formula-meta">
-              <h3 class="formula-name">{{ selectedNode.name }}</h3>
-              <span class="formula-category">{{ selectedNode.category }}</span>
+            <div class="node-meta">
+              <h3 class="node-title">{{ selectedNode.name }}</h3>
+              <div class="node-tags">
+                <span class="tag category" :class="selectedNode.category">{{ getCategoryName(selectedNode.category) }}</span>
+                <span class="tag importance" :class="selectedNode.importance">{{ selectedNode.importance }}</span>
+                <span class="tag connections">{{ getNodeConnections(selectedNode.id).length }} 连接</span>
+              </div>
             </div>
-            <button
-              @click="selectedNode = null"
-              class="close-btn hover-scale"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
+          </div>
+          <button class="close-panel" @click="selectedNode = null">
+            <span class="close-icon">×</span>
+          </button>
+        </div>
+        
+        <div class="panel-content">
+          <div class="node-description">
+            <h4 class="content-title">
+              <span class="title-icon">📋</span>
+              概念描述
+            </h4>
+            <p class="description-text">{{ selectedNode.description }}</p>
           </div>
           
-          <div class="formula-latex" ref="latexContainer">
-            $${{ selectedNode.latex }}$$
-          </div>
-          
-          <p class="formula-description">{{ selectedNode.description }}</p>
-          
-          <!-- 相关公式 -->
-          <div v-if="relatedFormulas.length > 0" class="related-formulas">
-            <h4 class="related-title">相关公式</h4>
-            <div class="related-list">
-              <button
-                v-for="related in relatedFormulas"
-                :key="related.id"
-                @click="selectRelatedFormula(related)"
-                class="related-item hover-scale"
-                :style="{ borderColor: related.color }"
+          <div class="node-properties">
+            <h4 class="content-title">
+              <span class="title-icon">⚙️</span>
+              属性参数
+            </h4>
+            <div class="properties-grid">
+              <div
+                v-for="property in selectedNode.properties"
+                :key="property.name"
+                class="property-item"
               >
-                <span class="related-number" :style="{ backgroundColor: related.color }">
-                  {{ related.id }}
-                </span>
-                <span class="related-name">{{ related.name }}</span>
-              </button>
+                <div class="property-name">{{ property.name }}</div>
+                <div class="property-value">{{ property.value }}</div>
+                <div class="property-unit">{{ property.unit }}</div>
+              </div>
             </div>
           </div>
+          
+          <div class="related-nodes">
+            <h4 class="content-title">
+              <span class="title-icon">🔗</span>
+              相关节点
+            </h4>
+            <div class="related-list">
+              <div
+                v-for="relatedId in getNodeConnections(selectedNode.id)"
+                :key="relatedId"
+                class="related-item"
+                @click="selectNode(getNodeById(relatedId))"
+              >
+                <div class="related-icon">{{ getNodeById(relatedId)?.icon }}</div>
+                <div class="related-info">
+                  <div class="related-name">{{ getNodeById(relatedId)?.name }}</div>
+                  <div class="related-type">{{ getConnectionType(selectedNode.id, relatedId) }}</div>
+                </div>
+                <div class="related-strength">
+                  {{ getConnectionStrength(selectedNode.id, relatedId) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="panel-actions">
+          <button class="action-btn primary" @click="exploreNode(selectedNode)">
+            <span class="btn-icon">🚀</span>
+            <span class="btn-text">深入探索</span>
+          </button>
+          <button class="action-btn secondary" @click="analyzeConnections(selectedNode)">
+            <span class="btn-icon">🔍</span>
+            <span class="btn-text">分析连接</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
-          <div class="info-actions">
-            <button
-              @click="viewFormulaDetail(selectedNode)"
-              class="detail-btn hover-scale"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              查看详情
-            </button>
-            <button
-              @click="focusOnNode(selectedNode)"
-              class="focus-btn hover-scale"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-              聚焦节点
-            </button>
+    <!-- 连接详情面板 -->
+    <div v-if="selectedConnection" class="connection-details-panel">
+      <div class="panel-container">
+        <div class="panel-header">
+          <div class="connection-info">
+            <div class="connection-icon">🔗</div>
+            <div class="connection-meta">
+              <h3 class="connection-title">
+                {{ getNodeById(selectedConnection.source)?.name }} 
+                ↔ 
+                {{ getNodeById(selectedConnection.target)?.name }}
+              </h3>
+              <div class="connection-tags">
+                <span class="tag type" :class="selectedConnection.type">{{ getConnectionTypeName(selectedConnection.type) }}</span>
+                <span class="tag strength">强度: {{ selectedConnection.strength }}</span>
+              </div>
+            </div>
+          </div>
+          <button class="close-panel" @click="selectedConnection = null">
+            <span class="close-icon">×</span>
+          </button>
+        </div>
+        
+        <div class="panel-content">
+          <div class="connection-description">
+            <h4 class="content-title">
+              <span class="title-icon">📋</span>
+              关系描述
+            </h4>
+            <p class="description-text">{{ selectedConnection.description }}</p>
+          </div>
+          
+          <div class="connection-metrics">
+            <h4 class="content-title">
+              <span class="title-icon">📊</span>
+              连接指标
+            </h4>
+            <div class="metrics-grid">
+              <div class="metric-item">
+                <div class="metric-icon">💪</div>
+                <div class="metric-info">
+                  <div class="metric-value">{{ selectedConnection.strength }}</div>
+                  <div class="metric-label">连接强度</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-icon">📏</div>
+                <div class="metric-info">
+                  <div class="metric-value">{{ selectedConnection.distance }}</div>
+                  <div class="metric-label">时空距离</div>
+                </div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-icon">⚡</div>
+                <div class="metric-info">
+                  <div class="metric-value">{{ selectedConnection.energy }}</div>
+                  <div class="metric-label">能量流动</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="panel-actions">
+          <button class="action-btn primary" @click="strengthenConnection(selectedConnection)">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">强化连接</span>
+          </button>
+          <button class="action-btn secondary" @click="traceConnection(selectedConnection)">
+            <span class="btn-icon">🔍</span>
+            <span class="btn-text">追踪路径</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 网络分析工具 -->
+    <div class="analysis-tools">
+      <div class="tools-container">
+        <h2 class="section-title">
+          <span class="title-icon">🔬</span>
+          网络分析工具
+        </h2>
+        <div class="tools-grid">
+          <div class="tool-card" @click="runCentralityAnalysis">
+            <div class="tool-icon">🎯</div>
+            <div class="tool-info">
+              <div class="tool-name">中心性分析</div>
+              <div class="tool-description">识别网络中的关键节点</div>
+            </div>
+            <div class="tool-status">
+              <div class="status-indicator ready"></div>
+            </div>
+          </div>
+          
+          <div class="tool-card" @click="runClusterAnalysis">
+            <div class="tool-icon">🌐</div>
+            <div class="tool-info">
+              <div class="tool-name">聚类分析</div>
+              <div class="tool-description">发现概念群组和社区</div>
+            </div>
+            <div class="tool-status">
+              <div class="status-indicator ready"></div>
+            </div>
+          </div>
+          
+          <div class="tool-card" @click="runPathAnalysis">
+            <div class="tool-icon">🛤️</div>
+            <div class="tool-info">
+              <div class="tool-name">路径分析</div>
+              <div class="tool-description">寻找最短连接路径</div>
+            </div>
+            <div class="tool-status">
+              <div class="status-indicator ready"></div>
+            </div>
+          </div>
+          
+          <div class="tool-card" @click="runInfluenceAnalysis">
+            <div class="tool-icon">📈</div>
+            <div class="tool-info">
+              <div class="tool-name">影响力分析</div>
+              <div class="tool-description">评估节点的影响范围</div>
+            </div>
+            <div class="tool-status">
+              <div class="status-indicator ready"></div>
+            </div>
           </div>
         </div>
       </div>
-    </Transition>
-
-    <!-- 提示信息 -->
-    <div v-if="!selectedNode && filteredNodes.length === 0" class="empty-state">
-      <div class="empty-icon">
-        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-        </svg>
-      </div>
-      <h3 class="empty-title">没有找到匹配的公式</h3>
-      <p class="empty-description">请尝试调整筛选条件或搜索关键词</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick, watch, onUnmounted } from 'vue'
-import * as d3 from 'd3'
-import { formulas, categories, type Formula } from '../data/formulas'
+import { ref, computed, onMounted, nextTick } from 'vue'
 
-// 响应式状态
-const graphContainer = ref<HTMLElement>()
-const latexContainer = ref<HTMLElement>()
-const selectedNode = ref<Formula | null>(null)
-const selectedCategory = ref('')
-const searchQuery = ref('')
-const isLoading = ref(true)
-const physicsEnabled = ref(true)
-const showLabels = ref(true)
-
-// 布局控制参数
-const nodeSize = ref(20)
-const linkStrength = ref(1)
-const chargeStrength = ref(-300)
-
-// D3 相关变量
-let simulation: d3.Simulation<any, any> | null = null
-let svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null = null
-let zoom: d3.ZoomBehavior<SVGSVGElement, unknown> | null = null
-let nodeElements: d3.Selection<SVGCircleElement, any, SVGGElement, unknown> | null = null
-let linkElements: d3.Selection<SVGLineElement, any, SVGGElement, unknown> | null = null
-let labelElements: d3.Selection<SVGTextElement, any, SVGGElement, unknown> | null = null
-
-// 扩展节点类型
-interface ExtendedFormula extends Formula {
-  x?: number
-  y?: number
-  fx?: number | null
-  fy?: number | null
-  vx?: number
-  vy?: number
+// 定义类型
+interface NetworkNode {
+  id: string
+  name: string
+  icon: string
+  category: 'theory' | 'field' | 'application' | 'experiment'
+  importance: 'high' | 'medium' | 'low'
+  size: number
+  color: string
+  description: string
+  properties: Array<{
+    name: string
+    value: string
+    unit: string
+  }>
 }
 
-// 创建图数据
-const nodes: ExtendedFormula[] = formulas.map(formula => ({
-  ...formula,
-  x: 0,
-  y: 0,
-  fx: null,
-  fy: null
-}))
+interface NetworkConnection {
+  source: string
+  target: string
+  type: 'causal' | 'mathematical' | 'conceptual' | 'experimental'
+  strength: number
+  distance: number
+  energy: number
+  description: string
+  animationSpeed: number
+}
 
-// 定义更复杂的关系网络
-const linkData = [
-  // 时空理论内部关系
-  { source: 1, target: 2, strength: 1.5, type: 'evolution' },
-  
-  // 时空理论到力学基础
-  { source: 1, target: 5, strength: 1.2, type: 'foundation' },
-  { source: 2, target: 8, strength: 1.0, type: 'application' },
-  
-  // 力学基础内部关系
-  { source: 3, target: 4, strength: 1.8, type: 'definition' },
-  { source: 3, target: 6, strength: 1.3, type: 'extension' },
-  { source: 5, target: 6, strength: 1.6, type: 'evolution' },
-  
-  // 力学基础到统一理论
-  { source: 4, target: 7, strength: 1.4, type: 'integration' },
-  { source: 6, target: 7, strength: 1.7, type: 'integration' },
-  
-  // 统一理论内部关系
-  { source: 7, target: 8, strength: 1.5, type: 'complement' },
-  
-  // 统一理论到电磁理论
-  { source: 7, target: 12, strength: 1.6, type: 'derivation' },
-  { source: 7, target: 14, strength: 1.3, type: 'derivation' },
-  { source: 8, target: 12, strength: 1.2, type: 'wave_relation' },
-  
-  // 电磁理论内部关系
-  { source: 9, target: 10, strength: 1.8, type: 'definition' },
-  { source: 9, target: 11, strength: 1.7, type: 'definition' },
-  { source: 10, target: 14, strength: 1.4, type: 'field_relation' },
-  { source: 11, target: 15, strength: 1.3, type: 'field_relation' },
-  { source: 12, target: 14, strength: 1.5, type: 'transformation' },
-  { source: 13, target: 15, strength: 1.4, type: 'vector_relation' },
-  { source: 14, target: 15, strength: 1.6, type: 'field_interaction' },
-  
-  // 电磁理论到应用理论
-  { source: 12, target: 16, strength: 1.2, type: 'energy_relation' },
-  { source: 14, target: 17, strength: 1.1, type: 'dynamics' },
-  
-  // 应用理论内部关系
-  { source: 16, target: 17, strength: 1.3, type: 'application' }
-]
+interface VisualizationMode {
+  id: string
+  name: string
+  icon: string
+}
 
-const links = linkData.map(link => ({
-  source: nodes.find(n => n.id === link.source)!,
-  target: nodes.find(n => n.id === link.target)!,
-  strength: link.strength,
-  type: link.type
-}))
+// 响应式数据
+const currentMode = ref('network')
+const spaceTimeDepth = ref(5)
+const connectionStrength = ref(0.7)
+const selectedNode = ref<NetworkNode | null>(null)
+const selectedConnection = ref<NetworkConnection | null>(null)
+const networkSvg = ref<SVGElement>()
+
+const svgDimensions = ref({
+  width: 1200,
+  height: 800
+})
+
+const networkStats = ref({
+  nodes: 24,
+  connections: 48,
+  energy: '95.7%'
+})
+
+// 可视化模式
+const visualModes = ref<VisualizationMode[]>([
+  { id: 'network', name: '网络图', icon: '🕸️' },
+  { id: 'hierarchy', name: '层次图', icon: '🌳' },
+  { id: 'force', name: '力导向图', icon: '⚡' },
+  { id: 'circular', name: '环形图', icon: '🔄' }
+])
+
+// 网络节点数据
+const networkNodes = ref<NetworkNode[]>([
+  {
+    id: 'electromagnetic-field',
+    name: '电磁场理论',
+    icon: '⚡',
+    category: 'theory',
+    importance: 'high',
+    size: 25,
+    color: '#00f5ff',
+    description: '描述电荷和电流产生的电磁现象的基础理论，是人工场技术的核心基础。',
+    properties: [
+      { name: '场强度', value: '10^6', unit: 'V/m' },
+      { name: '频率范围', value: '1-100', unit: 'THz' },
+      { name: '能量密度', value: '10^12', unit: 'J/m³' }
+    ]
+  },
+  {
+    id: 'quantum-mechanics',
+    name: '量子力学',
+    icon: '🌀',
+    category: 'theory',
+    importance: 'high',
+    size: 24,
+    color: '#64ffda',
+    description: '研究微观粒子运动规律的理论，为量子场操控提供理论基础。',
+    properties: [
+      { name: '量子态数', value: '∞', unit: '维' },
+      { name: '不确定性', value: 'ℏ/2', unit: 'J·s' },
+      { name: '纠缠度', value: '0.95', unit: '' }
+    ]
+  },
+  {
+    id: 'relativity-theory',
+    name: '相对论',
+    icon: '🌌',
+    category: 'theory',
+    importance: 'high',
+    size: 23,
+    color: '#ff00ff',
+    description: '描述时空结构和引力本质的理论，是时空操控技术的理论基础。',
+    properties: [
+      { name: '时空曲率', value: '10^-15', unit: 'm^-1' },
+      { name: '光速', value: '2.998×10^8', unit: 'm/s' },
+      { name: '引力波频率', value: '100-1000', unit: 'Hz' }
+    ]
+  },
+  {
+    id: 'artificial-field',
+    name: '人工场生成',
+    icon: '🔬',
+    category: 'field',
+    importance: 'high',
+    size: 22,
+    color: '#ffd700',
+    description: '通过技术手段创造和控制各种物理场的核心技术。',
+    properties: [
+      { name: '场强控制精度', value: '0.001', unit: '%' },
+      { name: '响应时间', value: '10^-12', unit: 's' },
+      { name: '稳定性', value: '99.99', unit: '%' }
+    ]
+  },
+  {
+    id: 'space-time-manipulation',
+    name: '时空操控',
+    icon: '⏰',
+    category: 'application',
+    importance: 'high',
+    size: 21,
+    color: '#00ff00',
+    description: '利用人工场技术实现对时空结构的精确控制和操作。',
+    properties: [
+      { name: '时间膨胀因子', value: '1.001', unit: '' },
+      { name: '空间弯曲度', value: '10^-10', unit: 'm^-1' },
+      { name: '操控范围', value: '1000', unit: 'm' }
+    ]
+  },
+  {
+    id: 'warp-drive',
+    name: '曲速引擎',
+    icon: '🚀',
+    category: 'application',
+    importance: 'medium',
+    size: 20,
+    color: '#ff6b6b',
+    description: '基于时空弯曲原理的超光速推进系统。',
+    properties: [
+      { name: '最大速度', value: '10c', unit: '光速' },
+      { name: '能量需求', value: '10^20', unit: 'J' },
+      { name: '稳定性', value: '85', unit: '%' }
+    ]
+  },
+  {
+    id: 'quantum-entanglement',
+    name: '量子纠缠',
+    icon: '🔗',
+    category: 'field',
+    importance: 'medium',
+    size: 19,
+    color: '#9c27b0',
+    description: '量子粒子间的非局域关联现象，用于量子通信和计算。',
+    properties: [
+      { name: '纠缠保真度', value: '0.99', unit: '' },
+      { name: '传输距离', value: '1000', unit: 'km' },
+      { name: '纠缠寿命', value: '10', unit: 's' }
+    ]
+  },
+  {
+    id: 'holographic-projection',
+    name: '全息投影',
+    icon: '🎭',
+    category: 'application',
+    importance: 'medium',
+    size: 18,
+    color: '#ff9800',
+    description: '基于光场操控的三维全息显示技术。',
+    properties: [
+      { name: '分辨率', value: '8K×8K', unit: 'pixels' },
+      { name: '视角范围', value: '360', unit: '度' },
+      { name: '刷新率', value: '120', unit: 'Hz' }
+    ]
+  }
+])
+
+// 网络连接数据
+const networkConnections = ref<NetworkConnection[]>([
+  {
+    source: 'electromagnetic-field',
+    target: 'artificial-field',
+    type: 'causal',
+    strength: 0.9,
+    distance: 1.2,
+    energy: 85,
+    description: '电磁场理论为人工场生成提供了基础的物理原理和数学框架。',
+    animationSpeed: 2
+  },
+  {
+    source: 'quantum-mechanics',
+    target: 'quantum-entanglement',
+    type: 'mathematical',
+    strength: 0.95,
+    distance: 0.8,
+    energy: 92,
+    description: '量子力学直接描述了量子纠缠现象的本质和规律。',
+    animationSpeed: 1.5
+  },
+  {
+    source: 'relativity-theory',
+    target: 'space-time-manipulation',
+    type: 'causal',
+    strength: 0.88,
+    distance: 1.1,
+    energy: 78,
+    description: '相对论为时空操控技术提供了理论基础和数学工具。',
+    animationSpeed: 2.5
+  },
+  {
+    source: 'space-time-manipulation',
+    target: 'warp-drive',
+    type: 'conceptual',
+    strength: 0.85,
+    distance: 1.0,
+    energy: 88,
+    description: '时空操控技术是实现曲速引擎的关键技术基础。',
+    animationSpeed: 2
+  },
+  {
+    source: 'artificial-field',
+    target: 'holographic-projection',
+    type: 'experimental',
+    strength: 0.75,
+    distance: 1.3,
+    energy: 65,
+    description: '人工场技术可以用于控制光场，实现高质量的全息投影。',
+    animationSpeed: 3
+  },
+  {
+    source: 'quantum-entanglement',
+    target: 'space-time-manipulation',
+    type: 'conceptual',
+    strength: 0.7,
+    distance: 1.5,
+    energy: 72,
+    description: '量子纠缠现象可能与时空的非局域性质存在深层联系。',
+    animationSpeed: 2.8
+  }
+])
 
 // 计算属性
-const filteredNodes = computed(() => {
-  if (!selectedCategory.value) return nodes
-  return nodes.filter(node => node.category === selectedCategory.value)
-})
-
-const filteredLinks = computed(() => {
-  const nodeIds = new Set(filteredNodes.value.map(n => n.id))
-  return links.filter(link => 
-    nodeIds.has((link.source as ExtendedFormula).id) && 
-    nodeIds.has((link.target as ExtendedFormula).id)
-  )
-})
-
-const searchResults = computed(() => {
-  if (!searchQuery.value.trim()) return []
-  const query = searchQuery.value.toLowerCase()
-  return formulas.filter(formula => 
-    formula.name.toLowerCase().includes(query) ||
-    formula.description.toLowerCase().includes(query) ||
-    formula.category.toLowerCase().includes(query)
-  ).slice(0, 5)
-})
-
-const relatedFormulas = computed(() => {
-  if (!selectedNode.value) return []
+const nodePositions = computed(() => {
+  const positions: Record<string, { x: number; y: number }> = {}
+  const centerX = svgDimensions.value.width / 2
+  const centerY = svgDimensions.value.height / 2
+  const radius = Math.min(centerX, centerY) * 0.7
   
-  const relatedIds = new Set<number>()
-  
-  // 找到所有相关的节点
-  links.forEach(link => {
-    const sourceId = (link.source as ExtendedFormula).id
-    const targetId = (link.target as ExtendedFormula).id
-    
-    if (sourceId === selectedNode.value!.id) {
-      relatedIds.add(targetId)
-    } else if (targetId === selectedNode.value!.id) {
-      relatedIds.add(sourceId)
+  networkNodes.value.forEach((node, index) => {
+    const angle = (index / networkNodes.value.length) * 2 * Math.PI
+    positions[node.id] = {
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle)
     }
   })
   
-  return formulas.filter(f => relatedIds.has(f.id))
+  return positions
 })
 
-// 生命周期
-onMounted(async () => {
-  await nextTick()
-  setTimeout(() => {
-    if (graphContainer.value) {
-      initGraph()
-      isLoading.value = false
-    }
-  }, 500)
-})
-
-onUnmounted(() => {
-  if (simulation) {
-    simulation.stop()
-  }
-})
-
-// 监听器
-watch(selectedNode, async (newNode) => {
-  if (newNode && latexContainer.value) {
-    await nextTick()
-    // 重新渲染 MathJax
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      try {
-        await window.MathJax.typesetPromise([latexContainer.value])
-      } catch (error) {
-        console.warn('MathJax rendering failed:', error)
-      }
-    }
-  }
-})
-
-watch([selectedCategory, searchQuery], () => {
-  updateGraphData()
-})
-
-watch([nodeSize, linkStrength, chargeStrength], () => {
-  updateSimulationForces()
-})
-
-// 图形初始化
-const initGraph = () => {
-  if (!graphContainer.value) return
-
-  const container = graphContainer.value
-  const width = container.clientWidth
-  const height = container.clientHeight
-
-  // 清除之前的内容
-  d3.select(container).selectAll('*').remove()
-
-  // 创建 SVG
-  svg = d3.select(container)
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height)
-
-  // 创建缩放行为
-  zoom = d3.zoom<SVGSVGElement, unknown>()
-    .scaleExtent([0.1, 4])
-    .on('zoom', (event) => {
-      if (svg) {
-        svg.select('.graph-content').attr('transform', event.transform)
-      }
-    })
-
-  svg.call(zoom)
-
-  // 创建主要内容组
-  const g = svg.append('g').attr('class', 'graph-content')
-
-  // 创建箭头标记
-  svg.append('defs').selectAll('marker')
-    .data(['arrow'])
-    .enter().append('marker')
-    .attr('id', 'arrow')
-    .attr('viewBox', '0 -5 10 10')
-    .attr('refX', 25)
-    .attr('refY', 0)
-    .attr('markerWidth', 6)
-    .attr('markerHeight', 6)
-    .attr('orient', 'auto')
-    .append('path')
-    .attr('d', 'M0,-5L10,0L0,5')
-    .attr('fill', '#999')
-
-  // 创建力导向图
-  simulation = d3.forceSimulation(filteredNodes.value)
-    .force('link', d3.forceLink(filteredLinks.value)
-      .id((d: any) => d.id)
-      .distance(d => 80 + (d as any).strength * 20)
-      .strength(linkStrength.value))
-    .force('charge', d3.forceManyBody().strength(chargeStrength.value))
-    .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('collision', d3.forceCollide().radius(nodeSize.value + 5))
-
-  // 创建连线
-  linkElements = g.append('g')
-    .attr('class', 'links')
-    .selectAll('line')
-    .data(filteredLinks.value)
-    .enter().append('line')
-    .attr('stroke', d => getLinkColor((d as any).type))
-    .attr('stroke-opacity', 0.6)
-    .attr('stroke-width', d => 1 + (d as any).strength)
-    .attr('marker-end', 'url(#arrow)')
-
-  // 创建节点
-  nodeElements = g.append('g')
-    .attr('class', 'nodes')
-    .selectAll('circle')
-    .data(filteredNodes.value)
-    .enter().append('circle')
-    .attr('r', nodeSize.value)
-    .attr('fill', (d: any) => d.color)
-    .attr('stroke', '#fff')
-    .attr('stroke-width', 2)
-    .style('cursor', 'pointer')
-    .call(d3.drag<any, any>()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended))
-    .on('click', (event, d) => {
-      event.stopPropagation()
-      selectedNode.value = d as Formula
-      highlightConnections(d as ExtendedFormula)
-    })
-    .on('mouseover', (event, d) => {
-      showTooltip(event, d as Formula)
-      highlightConnections(d as ExtendedFormula, 0.3)
-    })
-    .on('mouseout', () => {
-      hideTooltip()
-      resetHighlight()
-    })
-
-  // 创建标签
-  labelElements = g.append('g')
-    .attr('class', 'labels')
-    .selectAll('text')
-    .data(filteredNodes.value)
-    .enter().append('text')
-    .text((d: any) => d.id)
-    .attr('text-anchor', 'middle')
-    .attr('dy', '.35em')
-    .attr('fill', 'white')
-    .attr('font-weight', 'bold')
-    .attr('font-size', '12px')
-    .style('pointer-events', 'none')
-    .style('display', showLabels.value ? 'block' : 'none')
-
-  // 更新位置
-  simulation.on('tick', () => {
-    if (linkElements) {
-      linkElements
-        .attr('x1', (d: any) => d.source.x)
-        .attr('y1', (d: any) => d.source.y)
-        .attr('x2', (d: any) => d.target.x)
-        .attr('y2', (d: any) => d.target.y)
-    }
-
-    if (nodeElements) {
-      nodeElements
-        .attr('cx', (d: any) => d.x)
-        .attr('cy', (d: any) => d.y)
-    }
-
-    if (labelElements) {
-      labelElements
-        .attr('x', (d: any) => d.x)
-        .attr('y', (d: any) => d.y)
-    }
-  })
-
-  // 点击空白区域取消选择
-  svg.on('click', () => {
-    selectedNode.value = null
-    resetHighlight()
-  })
+// 方法
+const setVisualizationMode = (mode: string) => {
+  currentMode.value = mode
+  // 这里可以添加切换可视化模式的逻辑
 }
 
-// 拖拽事件处理
-function dragstarted(event: any, d: any) {
-  if (!event.active && simulation) simulation.alphaTarget(0.3).restart()
-  d.fx = d.x
-  d.fy = d.y
-}
-
-function dragged(event: any, d: any) {
-  d.fx = event.x
-  d.fy = event.y
-}
-
-function dragended(event: any, d: any) {
-  if (!event.active && simulation) simulation.alphaTarget(0)
-  if (!event.sourceEvent.ctrlKey) {
-    d.fx = null
-    d.fy = null
+const getStarStyle = () => {
+  return {
+    top: Math.random() * 100 + '%',
+    left: Math.random() * 100 + '%',
+    animationDelay: Math.random() * 3 + 's',
+    animationDuration: (Math.random() * 2 + 1) + 's'
   }
 }
 
-// 工具函数
-const getLinkColor = (type: string) => {
-  const colors: Record<string, string> = {
-    'evolution': '#3B82F6',
-    'foundation': '#10B981',
-    'application': '#F59E0B',
-    'definition': '#EF4444',
-    'extension': '#8B5CF6',
-    'integration': '#F97316',
-    'complement': '#06B6D4',
-    'derivation': '#84CC16',
-    'wave_relation': '#EC4899',
-    'field_relation': '#6366F1',
-    'transformation': '#14B8A6',
-    'vector_relation': '#F59E0B',
-    'field_interaction': '#EF4444',
-    'energy_relation': '#8B5CF6',
-    'dynamics': '#10B981'
-  }
-  return colors[type] || '#999'
-}
-
-const showTooltip = (event: MouseEvent, formula: Formula) => {
-  // 实现工具提示显示逻辑
-  console.log('Show tooltip for:', formula.name)
-}
-
-const hideTooltip = () => {
-  // 实现工具提示隐藏逻辑
-}
-
-const highlightConnections = (node: ExtendedFormula, opacity = 1) => {
-  if (!linkElements || !nodeElements) return
-
-  // 高亮相关连接
-  linkElements
-    .style('opacity', (d: any) => {
-      return (d.source.id === node.id || d.target.id === node.id) ? opacity : 0.1
-    })
-    .style('stroke-width', (d: any) => {
-      return (d.source.id === node.id || d.target.id === node.id) ? 
-        (2 + d.strength) : (1 + d.strength)
-    })
-
-  // 高亮相关节点
-  nodeElements
-    .style('opacity', (d: any) => {
-      const isConnected = links.some(link => 
-        (link.source.id === node.id && link.target.id === d.id) ||
-        (link.target.id === node.id && link.source.id === d.id)
-      )
-      return (d.id === node.id || isConnected) ? opacity : 0.3
-    })
-}
-
-const resetHighlight = () => {
-  if (!linkElements || !nodeElements) return
-
-  linkElements
-    .style('opacity', 0.6)
-    .style('stroke-width', (d: any) => 1 + d.strength)
-
-  nodeElements
-    .style('opacity', 1)
-}
-
-// 控制面板功能
-const filterByCategory = (categoryName: string) => {
-  selectedCategory.value = categoryName
-}
-
-const handleSearch = () => {
-  // 搜索逻辑已在 computed 中实现
-}
-
-const highlightNode = (formula: Formula) => {
-  selectedNode.value = formula
-  
-  // 找到节点并聚焦
-  const node = filteredNodes.value.find(n => n.id === formula.id)
-  if (node && svg && zoom) {
-    const transform = d3.zoomIdentity
-      .translate(
-        graphContainer.value!.clientWidth / 2 - (node.x || 0),
-        graphContainer.value!.clientHeight / 2 - (node.y || 0)
-      )
-      .scale(1.5)
-    
-    svg.transition()
-      .duration(750)
-      .call(zoom.transform, transform)
+const getWebStrandStyle = () => {
+  return {
+    top: Math.random() * 100 + '%',
+    left: Math.random() * 100 + '%',
+    width: Math.random() * 200 + 100 + 'px',
+    transform: `rotate(${Math.random() * 360}deg)`,
+    animationDelay: Math.random() * 5 + 's'
   }
 }
 
-// 工具栏功能
-const zoomIn = () => {
-  if (svg && zoom) {
-    svg.transition().call(zoom.scaleBy, 1.5)
+const getVortexStyle = (index: number) => {
+  const size = 100 + index * 50
+  return {
+    width: size + 'px',
+    height: size + 'px',
+    animationDelay: index * 0.5 + 's'
   }
 }
 
-const zoomOut = () => {
-  if (svg && zoom) {
-    svg.transition().call(zoom.scaleBy, 1 / 1.5)
+const getFieldParticleStyle = () => {
+  return {
+    top: Math.random() * 100 + '%',
+    left: Math.random() * 100 + '%',
+    animationDelay: Math.random() * 4 + 's',
+    animationDuration: (Math.random() * 3 + 2) + 's'
   }
 }
 
-const fitToScreen = () => {
-  if (svg && zoom) {
-    const bounds = svg.select('.graph-content').node()?.getBBox()
-    if (bounds) {
-      const width = graphContainer.value!.clientWidth
-      const height = graphContainer.value!.clientHeight
-      const scale = Math.min(width / bounds.width, height / bounds.height) * 0.9
-      
-      const transform = d3.zoomIdentity
-        .translate(width / 2, height / 2)
-        .scale(scale)
-        .translate(-bounds.x - bounds.width / 2, -bounds.y - bounds.height / 2)
-      
-      svg.transition().duration(750).call(zoom.transform, transform)
-    }
+const getNodePosition = (nodeId: string) => {
+  return nodePositions.value[nodeId] || { x: 0, y: 0 }
+}
+
+const selectNode = (node: NetworkNode | undefined) => {
+  if (node) {
+    selectedNode.value = node
+    selectedConnection.value = null
   }
 }
 
-const togglePhysics = () => {
-  physicsEnabled.value = !physicsEnabled.value
-  if (simulation) {
-    if (physicsEnabled.value) {
-      simulation.alpha(0.3).restart()
-    } else {
-      simulation.stop()
-    }
-  }
-}
-
-const toggleLabels = () => {
-  showLabels.value = !showLabels.value
-  if (labelElements) {
-    labelElements.style('display', showLabels.value ? 'block' : 'none')
-  }
-}
-
-// 布局控制
-const updateNodeSize = () => {
-  if (nodeElements) {
-    nodeElements.attr('r', nodeSize.value)
-  }
-  if (simulation) {
-    simulation.force('collision', d3.forceCollide().radius(nodeSize.value + 5))
-    simulation.alpha(0.3).restart()
-  }
-}
-
-const updateLinkStrength = () => {
-  updateSimulationForces()
-}
-
-const updateChargeStrength = () => {
-  updateSimulationForces()
-}
-
-const updateSimulationForces = () => {
-  if (simulation) {
-    simulation
-      .force('link', d3.forceLink(filteredLinks.value)
-        .id((d: any) => d.id)
-        .distance(d => 80 + (d as any).strength * 20)
-        .strength(linkStrength.value))
-      .force('charge', d3.forceManyBody().strength(chargeStrength.value))
-      .alpha(0.3)
-      .restart()
-  }
-}
-
-const updateGraphData = () => {
-  if (!simulation || !svg) return
-
-  // 更新节点数据
-  nodeElements = svg.select('.nodes')
-    .selectAll('circle')
-    .data(filteredNodes.value, (d: any) => d.id)
-
-  nodeElements.exit().remove()
-
-  const nodeEnter = nodeElements.enter().append('circle')
-    .attr('r', nodeSize.value)
-    .attr('fill', (d: any) => d.color)
-    .attr('stroke', '#fff')
-    .attr('stroke-width', 2)
-    .style('cursor', 'pointer')
-    .call(d3.drag<any, any>()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended))
-    .on('click', (event, d) => {
-      event.stopPropagation()
-      selectedNode.value = d as Formula
-      highlightConnections(d as ExtendedFormula)
-    })
-    .on('mouseover', (event, d) => {
-      showTooltip(event, d as Formula)
-      highlightConnections(d as ExtendedFormula, 0.3)
-    })
-    .on('mouseout', () => {
-      hideTooltip()
-      resetHighlight()
-    })
-
-  nodeElements = nodeElements.merge(nodeEnter)
-
-  // 更新连线数据
-  linkElements = svg.select('.links')
-    .selectAll('line')
-    .data(filteredLinks.value)
-
-  linkElements.exit().remove()
-
-  const linkEnter = linkElements.enter().append('line')
-    .attr('stroke', d => getLinkColor((d as any).type))
-    .attr('stroke-opacity', 0.6)
-    .attr('stroke-width', d => 1 + (d as any).strength)
-    .attr('marker-end', 'url(#arrow)')
-
-  linkElements = linkElements.merge(linkEnter)
-
-  // 更新标签数据
-  labelElements = svg.select('.labels')
-    .selectAll('text')
-    .data(filteredNodes.value, (d: any) => d.id)
-
-  labelElements.exit().remove()
-
-  const labelEnter = labelElements.enter().append('text')
-    .text((d: any) => d.id)
-    .attr('text-anchor', 'middle')
-    .attr('dy', '.35em')
-    .attr('fill', 'white')
-    .attr('font-weight', 'bold')
-    .attr('font-size', '12px')
-    .style('pointer-events', 'none')
-    .style('display', showLabels.value ? 'block' : 'none')
-
-  labelElements = labelElements.merge(labelEnter)
-
-  // 更新仿真
-  simulation.nodes(filteredNodes.value)
-  simulation.force('link', d3.forceLink(filteredLinks.value)
-    .id((d: any) => d.id)
-    .distance(d => 80 + (d as any).strength * 20)
-    .strength(linkStrength.value))
-  simulation.alpha(1).restart()
-}
-
-// 操作按钮功能
-const resetGraph = () => {
-  selectedCategory.value = ''
+const selectConnection = (connection: NetworkConnection) => {
+  selectedConnection.value = connection
   selectedNode.value = null
-  searchQuery.value = ''
-  
-  if (simulation) {
-    // 重置所有节点的固定位置
-    filteredNodes.value.forEach(node => {
-      node.fx = null
-      node.fy = null
-    })
-    simulation.alpha(1).restart()
-  }
-  
-  // 重置缩放
-  if (svg && zoom) {
-    svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity)
-  }
-  
-  resetHighlight()
 }
 
-const exportGraph = () => {
-  if (!svg) return
-  
-  try {
-    const svgElement = svg.node()
-    if (!svgElement) return
-    
-    // 创建 canvas 元素
-    const canvas = document.createElement('canvas')
-    const context = canvas.getContext('2d')
-    if (!context) return
-    
-    const svgData = new XMLSerializer().serializeToString(svgElement)
-    const img = new Image()
-    
-    img.onload = () => {
-      canvas.width = img.width
-      canvas.height = img.height
-      context.drawImage(img, 0, 0)
-      
-      // 下载图片
-      const link = document.createElement('a')
-      link.download = 'formula-relationships.png'
-      link.href = canvas.toDataURL()
-      link.click()
+const highlightNode = (node: NetworkNode) => {
+  // 高亮节点的逻辑
+}
+
+const unhighlightNode = () => {
+  // 取消高亮的逻辑
+}
+
+const getNodeById = (id: string) => {
+  return networkNodes.value.find(node => node.id === id)
+}
+
+const getNodeConnections = (nodeId: string) => {
+  return networkConnections.value
+    .filter(conn => conn.source === nodeId || conn.target === nodeId)
+    .map(conn => conn.source === nodeId ? conn.target : conn.source)
+}
+
+const getConnectionType = (sourceId: string, targetId: string) => {
+  const connection = networkConnections.value.find(
+    conn => (conn.source === sourceId && conn.target === targetId) ||
+            (conn.source === targetId && conn.target === sourceId)
+  )
+  return getConnectionTypeName(connection?.type || 'unknown')
+}
+
+const getConnectionStrength = (sourceId: string, targetId: string) => {
+  const connection = networkConnections.value.find(
+    conn => (conn.source === sourceId && conn.target === targetId) ||
+            (conn.source === targetId && conn.target === sourceId)
+  )
+  return connection?.strength.toFixed(2) || '0.00'
+}
+
+const getCategoryName = (category: string) => {
+  const categoryMap: Record<string, string> = {
+    theory: '理论',
+    field: '场技术',
+    application: '应用',
+    experiment: '实验'
+  }
+  return categoryMap[category] || category
+}
+
+const getConnectionTypeName = (type: string) => {
+  const typeMap: Record<string, string> = {
+    causal: '因果关系',
+    mathematical: '数学关系',
+    conceptual: '概念关系',
+    experimental: '实验关系',
+    unknown: '未知关系'
+  }
+  return typeMap[type] || type
+}
+
+const exploreNode = (node: NetworkNode) => {
+  console.log('探索节点:', node.name)
+  // 这里可以添加探索节点的逻辑
+}
+
+const analyzeConnections = (node: NetworkNode) => {
+  console.log('分析连接:', node.name)
+  // 这里可以添加分析连接的逻辑
+}
+
+const strengthenConnection = (connection: NetworkConnection) => {
+  console.log('强化连接:', connection.source, '->', connection.target)
+  // 这里可以添加强化连接的逻辑
+}
+
+const traceConnection = (connection: NetworkConnection) => {
+  console.log('追踪路径:', connection.source, '->', connection.target)
+  // 这里可以添加追踪连接的逻辑
+}
+
+const runCentralityAnalysis = () => {
+  console.log('运行中心性分析')
+  // 这里可以添加中心性分析的逻辑
+}
+
+const runClusterAnalysis = () => {
+  console.log('运行聚类分析')
+  // 这里可以添加聚类分析的逻辑
+}
+
+const runPathAnalysis = () => {
+  console.log('运行路径分析')
+  // 这里可以添加路径分析的逻辑
+}
+
+const runInfluenceAnalysis = () => {
+  console.log('运行影响力分析')
+  // 这里可以添加影响力分析的逻辑
+}
+
+onMounted(() => {
+  // 组件挂载后的初始化逻辑
+  nextTick(() => {
+    if (networkSvg.value) {
+      // 初始化SVG相关逻辑
     }
-    
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)))
-  } catch (error) {
-    console.error('Export failed:', error)
-    alert('导出失败，请稍后重试')
-  }
-}
-
-const toggleFullscreen = () => {
-  if (!document.fullscreenElement) {
-    graphContainer.value?.requestFullscreen?.()
-  } else {
-    document.exitFullscreen?.()
-  }
-}
-
-// 公式详情功能
-const viewFormulaDetail = (formula: Formula) => {
-  // 这里可以跳转到公式详情页面或打开详情弹窗
-  console.log('View detail for formula:', formula.id)
-  // 可以使用 router 跳转或者打开模态框
-}
-
-const selectRelatedFormula = (formula: Formula) => {
-  selectedNode.value = formula
-  highlightNode(formula)
-}
-
-const focusOnNode = (formula: Formula) => {
-  highlightNode(formula)
-}
+  })
+})
 </script>
 
 <style scoped>
-.relationships-view {
-  @apply py-8 min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900;
+.spacetime-network {
+  min-height: 100vh;
+  background: #0a0a0f;
+  color: #ffffff;
+  overflow-x: hidden;
 }
 
-/* 头部样式 */
-.view-header {
-  @apply text-center mb-8 px-4;
+/* 头部区域 */
+.header-section {
+  position: relative;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+  overflow: hidden;
 }
 
-.view-title {
-  @apply text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.cosmic-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.star-field {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.star {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+.cosmic-web {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.web-strand {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(100, 255, 218, 0.3), transparent);
+  animation: webPulse 5s ease-in-out infinite;
+}
+
+@keyframes webPulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+}
+
+.energy-vortex {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.vortex-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(0, 245, 255, 0.2);
+  border-radius: 50%;
+  animation: vortexSpin 10s linear infinite;
+}
+
+@keyframes vortexSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.page-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+  background: linear-gradient(45deg, #00f5ff, #64ffda, #ff00ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
-.view-subtitle {
-  @apply text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-6;
+.title-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 0 10px #00f5ff);
 }
 
-.stats-bar {
-  @apply flex justify-center space-x-8 mt-6;
+.page-subtitle {
+  font-size: 1.25rem;
+  color: #b0bec5;
+  margin-bottom: 3rem;
+  text-align: center;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.stat-item {
-  @apply text-center;
-}
-
-.stat-number {
-  @apply block text-2xl font-bold text-blue-600 dark:text-blue-400;
-}
-
-.stat-label {
-  @apply text-sm text-gray-500 dark:text-gray-400;
-}
-
-/* 主容器样式 */
-.graph-container {
-  @apply max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-6;
-}
-
-.graph-section {
-  @apply lg:col-span-3 bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden relative;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* 工具栏样式 */
-.graph-toolbar {
-  @apply absolute top-4 left-4 right-4 z-10 flex justify-between items-center;
-}
-
-.toolbar-group {
-  @apply flex space-x-2;
-}
-
-.toolbar-btn {
-  @apply p-2 bg-white dark:bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400;
-}
-
-.toolbar-btn.active {
-  @apply bg-blue-500 text-white;
-}
-
-/* 图形画布样式 */
-.graph-canvas {
-  @apply w-full h-96 lg:h-[600px] relative;
-}
-
-.loading-overlay {
-  @apply absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-gray-800 bg-opacity-90;
-}
-
-.loading-spinner {
-  @apply w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4;
-}
-
-.loading-text {
-  @apply text-gray-600 dark:text-gray-300 font-medium;
-}
-
-/* 图例样式 */
-.graph-legend {
-  @apply absolute bottom-4 left-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-lg;
-}
-
-.legend-title {
-  @apply text-sm font-bold text-gray-900 dark:text-white mb-2;
-}
-
-.legend-items {
-  @apply space-y-1;
-}
-
-.legend-item {
-  @apply flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-300;
-}
-
-.legend-node {
-  @apply w-3 h-3 rounded-full;
-}
-
-/* 控制面板样式 */
 .control-panel {
-  @apply space-y-6;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
 }
 
 .panel-section {
-  @apply bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
   backdrop-filter: blur(10px);
 }
 
 .panel-title {
-  @apply text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #64ffda;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* 分类筛选样式 */
-.category-filters {
-  @apply space-y-2;
+.panel-icon {
+  font-size: 1.5rem;
 }
 
-.category-btn {
-  @apply w-full px-4 py-3 rounded-lg border-2 font-medium transition-all duration-300 text-left flex items-center justify-between hover:shadow-md;
+.control-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
 }
 
-.category-btn.active {
-  @apply shadow-lg transform scale-105;
+.control-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 2px solid rgba(100, 255, 218, 0.3);
+  border-radius: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-.category-count {
-  @apply text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300;
+.control-btn:hover,
+.control-btn.active {
+  border-color: rgba(100, 255, 218, 0.6);
+  background: rgba(100, 255, 218, 0.1);
+  box-shadow: 0 5px 15px rgba(100, 255, 218, 0.2);
 }
 
-.category-btn.active .category-count {
-  @apply bg-white bg-opacity-20 text-white;
+.btn-icon {
+  font-size: 1.25rem;
 }
 
-/* 搜索样式 */
-.search-container {
-  @apply relative;
+.btn-text {
+  font-size: 0.875rem;
+  font-weight: bold;
 }
 
-.search-input {
-  @apply w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+.tool-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.search-results {
-  @apply absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 max-h-60 overflow-y-auto z-20;
+.slider-control {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.search-result-item {
-  @apply flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition-colors border-b border-gray-100 dark:border-gray-600 last:border-b-0;
+.slider-label {
+  font-size: 0.875rem;
+  color: #64ffda;
+  min-width: 80px;
 }
 
-.result-number {
-  @apply w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3;
+.cosmic-slider {
+  flex: 1;
+  height: 6px;
+  background: rgba(100, 255, 218, 0.2);
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
 }
 
-.result-content {
-  @apply flex-1;
+.cosmic-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(45deg, #00f5ff, #64ffda);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
 }
 
-.result-name {
-  @apply font-medium text-gray-900 dark:text-white text-sm;
+.slider-value {
+  font-size: 0.875rem;
+  color: #ffffff;
+  font-weight: bold;
+  min-width: 40px;
+  text-align: right;
 }
 
-.result-category {
-  @apply text-xs text-gray-500 dark:text-gray-400;
+.network-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-/* 布局控制样式 */
-.layout-controls {
-  @apply space-y-4;
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.control-group {
-  @apply space-y-2;
+.stat-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  text-align: center;
 }
 
-.control-label {
-  @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+.stat-info {
+  flex: 1;
 }
 
-.control-slider {
-  @apply w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer;
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #00f5ff;
 }
 
-.control-slider::-webkit-slider-thumb {
-  @apply appearance-none w-4 h-4 bg-blue-500 rounded-full cursor-pointer;
+.stat-label {
+  font-size: 0.875rem;
+  color: #64ffda;
 }
 
-.control-value {
-  @apply text-xs text-gray-500 dark:text-gray-400 font-mono;
+/* 可视化区域 */
+.visualization-area {
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.3);
 }
 
-/* 操作按钮样式 */
-.action-buttons {
-  @apply space-y-3;
+.network-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  background: rgba(26, 26, 46, 0.5);
+  border: 2px solid rgba(100, 255, 218, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
 }
 
-.action-btn {
-  @apply w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center;
+.network-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
-.action-btn.primary {
-  @apply bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg;
+.dimension-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.1;
 }
 
-.action-btn.secondary {
-  @apply bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300;
+.grid-plane {
+  position: absolute;
+  border: 1px solid #64ffda;
 }
 
-/* 选中公式信息样式 */
-.selected-info {
-  @apply max-w-4xl mx-auto px-4 mt-8;
+.xy-plane {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
-.info-card {
-  @apply bg-white dark:bg-gray-800 rounded-xl p-6 shadow-xl border border-gray-200 dark:border-gray-700;
+.xz-plane {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  transform: perspective(500px) rotateX(45deg);
+}
+
+.yz-plane {
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  transform: perspective(500px) rotateY(45deg);
+}
+
+.quantum-field {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.field-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #64ffda;
+  border-radius: 50%;
+  animation: quantumFloat 4s ease-in-out infinite;
+}
+
+@keyframes quantumFloat {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-20px) scale(1.5); opacity: 1; }
+}
+
+.network-svg {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+.connection-line {
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.connection-line:hover {
+  stroke-width: 5 !important;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+.network-node {
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.network-node:hover {
+  transform: scale(1.1);
+}
+
+.network-node.selected .node-halo {
+  stroke-width: 4;
+  stroke-opacity: 0.8;
+}
+
+.node-body {
+  transition: all 0.3s;
+}
+
+.node-icon {
+  pointer-events: none;
+  font-weight: bold;
+}
+
+.node-label {
+  pointer-events: none;
+  font-weight: bold;
+}
+
+.interaction-hints {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 2;
+}
+
+.hint-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  border-radius: 20px;
+  font-size: 0.875rem;
+  color: #64ffda;
   backdrop-filter: blur(10px);
 }
 
-.info-header {
-  @apply flex items-center justify-between mb-4;
+.hint-icon {
+  font-size: 1rem;
 }
 
-.formula-number {
-  @apply w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg;
+/* 详情面板 */
+.node-details-panel,
+.connection-details-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(20px);
+  border-left: 2px solid rgba(100, 255, 218, 0.3);
+  z-index: 1000;
+  overflow-y: auto;
+  animation: slideInRight 0.3s ease;
 }
 
-.formula-meta {
-  @apply flex-1 ml-4;
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
-.formula-name {
-  @apply text-xl font-bold text-gray-900 dark:text-white;
+.panel-container {
+  padding: 2rem;
 }
 
-.formula-category {
-  @apply text-sm text-gray-500 dark:text-gray-400;
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.2);
 }
 
-.close-btn {
-  @apply p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors;
+.node-info,
+.connection-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.formula-latex {
-  @apply text-center py-6 px-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-6 text-lg overflow-x-auto;
+.node-icon-large {
+  font-size: 3rem;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid currentColor;
 }
 
-.formula-description {
-  @apply text-gray-600 dark:text-gray-300 mb-6 leading-relaxed;
+.connection-icon {
+  font-size: 3rem;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(45deg, #00f5ff, #64ffda);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* 相关公式样式 */
-.related-formulas {
-  @apply mb-6;
+.node-meta,
+.connection-meta {
+  flex: 1;
 }
 
-.related-title {
-  @apply text-lg font-semibold text-gray-900 dark:text-white mb-3;
+.node-title,
+.connection-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.node-tags,
+.connection-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.tag.category {
+  background: rgba(100, 255, 218, 0.2);
+  color: #64ffda;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+}
+
+.tag.importance.high {
+  background: rgba(255, 0, 0, 0.2);
+  color: #ff4444;
+}
+
+.tag.importance.medium {
+  background: rgba(255, 255, 0, 0.2);
+  color: #ffff00;
+}
+
+.tag.importance.low {
+  background: rgba(0, 255, 0, 0.2);
+  color: #00ff00;
+}
+
+.tag.connections {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.tag.type {
+  background: rgba(0, 245, 255, 0.2);
+  color: #00f5ff;
+}
+
+.tag.strength {
+  background: rgba(255, 165, 0, 0.2);
+  color: #ffa500;
+}
+
+.close-panel {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-panel:hover {
+  border-color: #ff4444;
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.close-icon {
+  font-size: 1.5rem;
+  color: #ffffff;
+}
+
+.panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.content-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #64ffda;
+  margin-bottom: 1rem;
+}
+
+.description-text {
+  color: #b0bec5;
+  line-height: 1.6;
+}
+
+.properties-grid,
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.property-item,
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.property-name {
+  font-size: 0.875rem;
+  color: #64ffda;
+  margin-bottom: 0.5rem;
+}
+
+.property-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
+}
+
+.property-unit {
+  font-size: 0.75rem;
+  color: #b0bec5;
+}
+
+.metric-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.metric-info {
+  text-align: center;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #00f5ff;
+  margin-bottom: 0.25rem;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: #64ffda;
 }
 
 .related-list {
-  @apply grid grid-cols-1 sm:grid-cols-2 gap-2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .related-item {
-  @apply flex items-center p-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-200 cursor-pointer;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-.related-number {
-  @apply w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2;
+.related-item:hover {
+  background: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.4);
+}
+
+.related-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  text-align: center;
+}
+
+.related-info {
+  flex: 1;
 }
 
 .related-name {
-  @apply text-sm text-gray-700 dark:text-gray-300 truncate;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 0.25rem;
 }
 
-.info-actions {
-  @apply flex flex-wrap gap-3;
+.related-type {
+  font-size: 0.875rem;
+  color: #64ffda;
 }
 
-.detail-btn, .focus-btn {
-  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center;
+.related-strength {
+  font-size: 0.875rem;
+  color: #ffa500;
+  font-weight: bold;
 }
 
-.detail-btn {
-  @apply bg-blue-500 hover:bg-blue-600 text-white;
+.panel-actions {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(100, 255, 218, 0.2);
+  display: flex;
+  gap: 1rem;
 }
 
-.focus-btn {
-  @apply bg-purple-500 hover:bg-purple-600 text-white;
+.action-btn {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: bold;
 }
 
-/* 空状态样式 */
-.empty-state {
-  @apply text-center py-16 px-4;
+.action-btn.primary {
+  background: linear-gradient(45deg, #00f5ff, #64ffda);
+  color: #0a0a0f;
 }
 
-.empty-icon {
-  @apply mb-4;
+.action-btn.primary:hover {
+  box-shadow: 0 5px 15px rgba(0, 245, 255, 0.3);
+  transform: translateY(-2px);
 }
 
-.empty-title {
-  @apply text-xl font-semibold text-gray-900 dark:text-white mb-2;
+.action-btn.secondary {
+  background: transparent;
+  color: #64ffda;
+  border: 2px solid rgba(100, 255, 218, 0.3);
 }
 
-.empty-description {
-  @apply text-gray-500 dark:text-gray-400;
+.action-btn.secondary:hover {
+  background: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.5);
 }
 
-/* 过渡动画 */
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: all 0.3s ease;
+/* 分析工具 */
+.analysis-tools {
+  padding: 2rem;
+  background: rgba(26, 26, 46, 0.5);
 }
 
-.slide-up-enter-from {
-  opacity: 0;
-  transform: translateY(30px);
+.tools-container {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.slide-up-leave-to {
-  opacity: 0;
-  transform: translateY(-30px);
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #64ffda;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* 基础动画类 */
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out;
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
 }
 
-.animate-scale-in {
-  animation: scaleIn 0.6s ease-out;
+.tool-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(100, 255, 218, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-.animate-slide-in {
-  animation: slideIn 0.6s ease-out;
+.tool-card:hover {
+  border-color: rgba(100, 255, 218, 0.5);
+  background: rgba(100, 255, 218, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.2);
 }
 
-.hover-scale {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.tool-icon {
+  font-size: 2rem;
+  width: 60px;
+  text-align: center;
 }
 
-.hover-scale:hover {
-  transform: scale(1.02);
+.tool-info {
+  flex: 1;
+}
+
+.tool-name {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.tool-description {
+  font-size: 0.875rem;
+  color: #b0bec5;
+}
+
+.tool-status {
+  width: 40px;
+  text-align: center;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.status-indicator.ready {
+  background: #00ff00;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
-  .graph-container {
-    @apply grid-cols-1;
-  }
-  
-  .graph-section {
-    @apply order-2;
-  }
-  
   .control-panel {
-    @apply order-1;
+    grid-template-columns: 1fr;
   }
   
-  .graph-toolbar {
-    @apply flex-col space-y-2;
+  .node-details-panel,
+  .connection-details-panel {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
   }
   
-  .toolbar-group {
-    @apply justify-center;
+  .panel-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 2.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
   }
   
-  .stats-bar {
-    @apply flex-col space-y-2 space-x-0;
-  }
-}
-
-@media (max-width: 640px) {
-  .view-title {
-    @apply text-3xl;
+  .control-buttons {
+    grid-template-columns: 1fr;
   }
   
-  .graph-canvas {
-    @apply h-80;
+  .tools-grid {
+    grid-template-columns: 1fr;
   }
   
-  .info-actions {
-    @apply flex-col;
+  .properties-grid,
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .spacetime-network {
+    padding: 0;
   }
   
-  .related-list {
-    @apply grid-cols-1;
+  .header-section {
+    padding: 2rem 1rem;
   }
   
-  .graph-legend {
-    @apply hidden;
-  }
-}
-
-/* 深色模式优化 */
-@media (prefers-color-scheme: dark) {
-  .control-slider::-webkit-slider-thumb {
-    @apply bg-blue-400;
-  }
-}
-
-/* 动画关键帧 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* 自定义滚动条 */
-.search-results::-webkit-scrollbar {
-  width: 6px;
-}
-
-.search-results::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-600 rounded;
-}
-
-.search-results::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-500 rounded hover:bg-gray-400 dark:hover:bg-gray-400;
-}
-
-/* 高对比度模式支持 */
-@media (prefers-contrast: high) {
-  .category-btn {
-    @apply border-4;
+  .visualization-area {
+    padding: 1rem;
   }
   
-  .toolbar-btn {
-    @apply border-2 border-gray-400;
+  .analysis-tools {
+    padding: 1rem;
   }
-}
-
-/* 减少动画模式支持 */
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-in,
-  .animate-scale-in,
-  .animate-slide-in,
-  .hover-scale,
-  .slide-up-enter-active,
-  .slide-up-leave-active {
-    animation: none;
-    transition: none;
+  
+  .properties-grid,
+  .metrics-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

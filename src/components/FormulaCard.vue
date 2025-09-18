@@ -35,16 +35,19 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
-import type { Formula } from '../data/formulas'
+import type { SimpleFormula } from '../types/simple-formula'
 
 interface Props {
-  formula: Formula
+  formula: SimpleFormula
   index: number
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  index: 0
+})
+
 const emit = defineEmits<{
-  select: [formula: Formula]
+  select: [formula: SimpleFormula]
 }>()
 
 const latexRef = ref<HTMLElement>()

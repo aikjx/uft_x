@@ -1,200 +1,215 @@
 <template>
   <div class="home-view">
-    <!-- 英雄区域 -->
+    <!-- 星际探索门户 -->
     <section class="hero-section">
-      <div class="hero-background">
-        <div class="stars"></div>
-        <div class="cosmic-waves"></div>
+      <div class="stars-background"></div>
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            <span class="glitch-text">人工场探索</span>
+            <span class="subtitle">光速虚拟时代 · 星际旅行门户</span>
+          </h1>
+          <p class="hero-description">
+            穿越时空维度，探索张祥前统一场论的无限可能。
+            在光速虚拟世界中，开启你的星际探索之旅，
+            发现人工场的终极奥秘。
+          </p>
+          <div class="hero-actions">
+            <router-link to="/formulas" class="btn btn-primary pulse">
+              <span class="btn-icon">🚀</span>
+              启动探索
+            </router-link>
+            <router-link to="/relationships" class="btn btn-secondary">
+              <span class="btn-icon">🌌</span>
+              时空网络
+            </router-link>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hologram-container">
+            <div class="hologram-core">
+              <div class="energy-ring ring-1"></div>
+              <div class="energy-ring ring-2"></div>
+              <div class="energy-ring ring-3"></div>
+              <div class="quantum-particle p1"></div>
+              <div class="quantum-particle p2"></div>
+              <div class="quantum-particle p3"></div>
+              <div class="quantum-particle p4"></div>
+              <div class="central-core">
+                <div class="core-glow"></div>
+                <div class="core-symbol">⚛</div>
+              </div>
+            </div>
+            <div class="hologram-data">
+              <div class="data-stream stream-1"></div>
+              <div class="data-stream stream-2"></div>
+              <div class="data-stream stream-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 探索统计 -->
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-icon">🌟</div>
+          <div class="stat-number">{{ formulas.length }}</div>
+          <div class="stat-label">人工场方程</div>
+          <div class="stat-description">已发现的时空公式</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">🌌</div>
+          <div class="stat-number">{{ categories.length }}</div>
+          <div class="stat-label">维度领域</div>
+          <div class="stat-description">探索的理论维度</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-number">∞</div>
+          <div class="stat-label">光速航线</div>
+          <div class="stat-description">虚拟时空路径</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">🚀</div>
+          <div class="stat-number">∞</div>
+          <div class="stat-label">星际可能</div>
+          <div class="stat-description">无限探索空间</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 探索模块 -->
+    <section class="features-section">
+      <div class="section-header">
+        <h2 class="section-title">探索模块</h2>
+        <p class="section-subtitle">四大维度，无限可能的星际探索体验</p>
       </div>
       
-      <div class="container hero-content">
-        <div class="hero-text fade-in">
-          <h1 class="hero-title gradient-text">
-            张祥前统一场论
-          </h1>
-          <h2 class="hero-subtitle">
-            核心公式可视化项目
-          </h2>
-          <p class="hero-description">
-            探索宇宙的统一理论，通过先进的3D可视化技术，
-            深入理解时空、引力、电磁场的本质联系
+      <div class="features-grid">
+        <div class="feature-card card-equations">
+          <div class="card-background"></div>
+          <div class="feature-icon">🔬</div>
+          <h3 class="feature-title">人工场方程库</h3>
+          <p class="feature-description">
+            深入探索统一场论的核心方程，解锁时空操控的终极密码，
+            发现光速虚拟世界的数学基础
           </p>
-          
-          <div class="hero-stats">
-            <div class="stat-item">
-              <div class="stat-number">{{ totalFormulas }}</div>
-              <div class="stat-label">核心公式</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number">{{ categories.length }}</div>
-              <div class="stat-label">理论分类</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number">3D</div>
-              <div class="stat-label">可视化</div>
-            </div>
+          <div class="feature-stats">
+            <span class="stat">{{ formulas.length }} 个方程</span>
+            <span class="stat">{{ categories.length }} 个维度</span>
           </div>
-          
-          <div class="hero-actions">
-            <button 
-              @click="$router.push('/formulas')"
-              class="cta-button hover-scale"
-            >
-              <span class="button-icon">🚀</span>
-              开始探索
-            </button>
-            <button 
-              @click="$router.push('/learning-path')"
-              class="secondary-button hover-scale"
-            >
-              <span class="button-icon">📚</span>
-              学习路径
-            </button>
-          </div>
+          <router-link to="/formulas" class="feature-link">
+            <span>进入方程库</span>
+            <span class="link-arrow">→</span>
+          </router-link>
         </div>
         
-        <div class="hero-visual slide-up">
-          <div class="formula-preview">
-            <div class="math-formula" ref="heroFormulaRef">
-              $$\vec{r}(t) = \vec{C}t = x\vec{i} + y\vec{j} + z\vec{k}$$
-            </div>
-            <p class="formula-caption">时空同一化方程</p>
-            <div class="formula-animation">
-              <div class="particle" v-for="i in 12" :key="i" :style="{ animationDelay: `${i * 0.2}s` }"></div>
-            </div>
+        <div class="feature-card card-journey">
+          <div class="card-background"></div>
+          <div class="feature-icon">🛸</div>
+          <h3 class="feature-title">星际探索航线</h3>
+          <p class="feature-description">
+            规划你的星际探索路径，从基础时空理论到高维度星际旅行，
+            体验渐进式的宇宙探索之旅
+          </p>
+          <div class="feature-stats">
+            <span class="stat">12 条航线</span>
+            <span class="stat">∞ 种可能</span>
           </div>
+          <router-link to="/learning-path" class="feature-link">
+            <span>规划航线</span>
+            <span class="link-arrow">→</span>
+          </router-link>
+        </div>
+        
+        <div class="feature-card card-network">
+          <div class="card-background"></div>
+          <div class="feature-icon">🌐</div>
+          <h3 class="feature-title">时空关系网络</h3>
+          <p class="feature-description">
+            可视化探索理论间的时空连接，发现隐藏的维度关联，
+            构建完整的人工场知识图谱
+          </p>
+          <div class="feature-stats">
+            <span class="stat">多维连接</span>
+            <span class="stat">实时可视化</span>
+          </div>
+          <router-link to="/relationships" class="feature-link">
+            <span>探索网络</span>
+            <span class="link-arrow">→</span>
+          </router-link>
         </div>
       </div>
     </section>
-    
-    <!-- 特色功能 -->
-    <section class="features-section">
-      <div class="container">
-        <h2 class="section-title animate-fade-in-up">项目特色</h2>
-        
-        <div class="features-grid">
-          <div 
-            v-for="(feature, index) in features" 
-            :key="feature.title"
-            class="feature-card glass-effect animate-fade-in-up hover-scale"
-            :style="{ animationDelay: `${index * 0.2}s` }"
-          >
-            <div class="feature-icon" :style="{ background: feature.gradient }">
-              {{ feature.icon }}
+
+    <!-- 核心方程预览 -->
+    <section class="preview-section">
+      <div class="section-header">
+        <h2 class="section-title">核心人工场方程</h2>
+        <p class="section-subtitle">解锁时空操控的数学密码</p>
+      </div>
+      
+      <div class="equations-preview">
+        <div
+          v-for="formula in featuredFormulas"
+          :key="formula.id"
+          class="equation-card"
+          :class="`card-${formula.category.toLowerCase().replace(/\s+/g, '-')}`"
+        >
+          <div class="equation-header">
+            <div class="equation-id">{{ String(formula.id).padStart(3, '0') }}</div>
+            <div class="equation-meta">
+              <h4 class="equation-name">{{ formula.name }}</h4>
+              <span class="equation-category">{{ formula.category }}</span>
             </div>
-            <h3 class="feature-title">{{ feature.title }}</h3>
-            <p class="feature-description">{{ feature.description }}</p>
-            <div class="feature-stats">
-              <span class="feature-stat">{{ feature.stat }}</span>
+            <div class="equation-status">
+              <div class="status-indicator active"></div>
             </div>
+          </div>
+          <div class="equation-formula">
+            <div class="formula-display">{{ formula.latex }}</div>
+          </div>
+          <p class="equation-desc">{{ formula.description }}</p>
+          <div class="equation-actions">
+            <button class="action-btn explore">探索</button>
+            <button class="action-btn analyze">分析</button>
           </div>
         </div>
       </div>
+      
+      <div class="preview-actions">
+        <router-link to="/formulas" class="btn btn-outline">
+          <span class="btn-icon">🔬</span>
+          进入完整方程库
+        </router-link>
+      </div>
     </section>
-    
-    <!-- 公式分类 -->
-    <section class="categories-section">
-      <div class="container">
-        <h2 class="section-title animate-fade-in-up">公式分类</h2>
-        <p class="section-subtitle animate-fade-in-up" style="animation-delay: 0.2s">
-          按理论体系分类，系统性学习统一场论
+
+    <!-- 探索召唤 -->
+    <section class="cta-section">
+      <div class="cta-content">
+        <h2 class="cta-title">准备好开始你的星际探索了吗？</h2>
+        <p class="cta-description">
+          在光速虚拟时代，每一个方程都是通往未知宇宙的钥匙。
+          加入我们，探索人工场的无限奥秘，开启属于你的星际旅行。
         </p>
-        
-        <div class="categories-grid">
-          <div 
-            v-for="(category, index) in categoriesWithStats" 
-            :key="category.name"
-            class="category-card animate-fade-in-up hover-scale"
-            :style="{ 
-              animationDelay: `${index * 0.15}s`,
-              borderColor: category.color 
-            }"
-            @click="navigateToCategory(category.name)"
-          >
-            <div class="category-header">
-              <div class="category-icon" :style="{ background: `linear-gradient(135deg, ${category.color}, ${category.color}80)` }">
-                {{ getCategoryIcon(category.name) }}
-              </div>
-              <div class="category-count" :style="{ color: category.color }">
-                {{ category.count }} 个公式
-              </div>
-            </div>
-            <h3 class="category-name">{{ category.name }}</h3>
-            <p class="category-description">{{ getCategoryDescription(category.name) }}</p>
-            <div class="category-progress">
-              <div class="progress-bar">
-                <div 
-                  class="progress-fill" 
-                  :style="{ 
-                    width: `${(category.count / totalFormulas) * 100}%`,
-                    backgroundColor: category.color 
-                  }"
-                ></div>
-              </div>
-              <span class="progress-text">{{ Math.round((category.count / totalFormulas) * 100) }}%</span>
-            </div>
-          </div>
+        <div class="cta-actions">
+          <router-link to="/formulas" class="btn btn-primary large">
+            <span class="btn-icon">🚀</span>
+            立即开始探索
+          </router-link>
         </div>
       </div>
-    </section>
-    
-    <!-- 学习路径 -->
-    <section class="learning-section">
-      <div class="container">
-        <h2 class="section-title animate-fade-in-up">推荐学习路径</h2>
-        <p class="section-subtitle animate-fade-in-up" style="animation-delay: 0.2s">
-          循序渐进，系统掌握统一场论核心概念
-        </p>
-        
-        <div class="learning-path">
-          <div 
-            v-for="(step, index) in learningSteps" 
-            :key="index"
-            class="path-step animate-fade-in-up"
-            :style="{ 
-              animationDelay: `${index * 0.2}s`,
-              borderLeftColor: step.color 
-            }"
-          >
-            <div class="step-number" :style="{ backgroundColor: step.color }">
-              {{ index + 1 }}
-            </div>
-            <div class="step-content">
-              <h4 class="step-title">{{ step.title }}</h4>
-              <p class="step-description">{{ step.description }}</p>
-              <div class="step-formulas">
-                <span 
-                  v-for="formula in step.formulas" 
-                  :key="formula"
-                  class="formula-tag"
-                >
-                  {{ formula }}
-                </span>
-              </div>
-              <div class="step-progress">
-                <div class="step-progress-bar">
-                  <div 
-                    class="step-progress-fill" 
-                    :style="{ 
-                      width: `${step.progress}%`,
-                      backgroundColor: step.color 
-                    }"
-                  ></div>
-                </div>
-                <span class="step-progress-text">{{ step.progress }}%</span>
-              </div>
-            </div>
+      <div class="cta-visual">
+        <div class="portal-effect">
+          <div class="portal-ring ring-1"></div>
+          <div class="portal-ring ring-2"></div>
+          <div class="portal-ring ring-3"></div>
+          <div class="portal-center">
+            <div class="portal-glow"></div>
           </div>
-        </div>
-        
-        <div class="learning-cta animate-fade-in-up" style="animation-delay: 1s">
-          <button 
-            @click="$router.push('/learning-path')"
-            class="learning-button hover-scale"
-          >
-            <span class="button-icon">🎯</span>
-            开始学习之旅
-          </button>
         </div>
       </div>
     </section>
@@ -202,584 +217,790 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 import { formulas, categories } from '../data/formulas'
 
-const router = useRouter()
-const heroFormulaRef = ref<HTMLElement>()
-
-// 响应式检测
-const isMobile = ref(false)
-
-// 数据统计
-const totalFormulas = computed(() => formulas.length)
-const categoriesWithStats = computed(() => categories)
-
-// 特色功能数据
-const features = [
-  {
-    icon: '🌌',
-    title: '实时3D渲染',
-    description: '基于WebGL 2.0的高性能3D场景，提供沉浸式的物理现象可视化体验',
-    stat: 'WebGL 2.0',
-    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-  },
-  {
-    icon: '🎛️',
-    title: '交互式控制',
-    description: '实时调节公式参数，观察物理量变化对系统行为的影响',
-    stat: '实时交互',
-    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-  },
-  {
-    icon: '📊',
-    title: '数学公式同步',
-    description: 'MathJax动态渲染，公式与可视化完美同步显示',
-    stat: 'MathJax',
-    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
-  },
-  {
-    icon: '🔗',
-    title: '关系图谱',
-    description: '可视化公式间的内在联系，构建完整的理论体系',
-    stat: 'D3.js',
-    gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
-  },
-  {
-    icon: '📚',
-    title: '学习路径',
-    description: '循序渐进的学习指导，从基础概念到高级应用',
-    stat: '5个阶段',
-    gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
-  },
-  {
-    icon: '⚡',
-    title: '高性能计算',
-    description: '优化的算法和数据结构，确保流畅的用户体验',
-    stat: '60 FPS',
-    gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
-  }
-]
-
-// 学习步骤
-const learningSteps = [
-  {
-    title: '基础概念',
-    description: '理解时空统一和基本定义',
-    formulas: ['时空同一化方程', '三维螺旋时空方程', '质量定义方程'],
-    color: '#3B82F6',
-    progress: 25
-  },
-  {
-    title: '力学基础',
-    description: '掌握动量和力的统一概念',
-    formulas: ['引力场定义方程', '静止动量方程', '运动动量方程'],
-    color: '#10B981',
-    progress: 50
-  },
-  {
-    title: '统一理论',
-    description: '理解大统一方程和空间波动',
-    formulas: ['宇宙大统一方程', '空间波动方程'],
-    color: '#F59E0B',
-    progress: 75
-  },
-  {
-    title: '电磁与应用',
-    description: '掌握电磁场理论和实际应用',
-    formulas: ['电磁场方程', '统一场论能量方程', '光速飞行器动力学方程'],
-    color: '#EF4444',
-    progress: 100
-  }
-]
-
-// 获取分类图标
-const getCategoryIcon = (categoryName: string) => {
-  const icons: Record<string, string> = {
-    '时空理论': '🌌',
-    '力学基础': '⚡',
-    '统一理论': '🔮',
-    '电磁理论': '🧲',
-    '应用理论': '🚀'
-  }
-  return icons[categoryName] || '📐'
-}
-
-// 获取分类描述
-const getCategoryDescription = (categoryName: string) => {
-  const descriptions: Record<string, string> = {
-    '时空理论': '探索时间与空间的统一本质，理解宇宙的基本结构',
-    '力学基础': '建立统一的力学框架，重新定义质量、动量和引力',
-    '统一理论': '构建描述所有物理现象的大统一方程',
-    '电磁理论': '揭示电磁场的几何本质和统一场论基础',
-    '应用理论': '将理论应用于实际问题，探索未来科技可能'
-  }
-  return descriptions[categoryName] || '深入理解统一场论的核心概念'
-}
-
-// 导航到分类
-const navigateToCategory = (categoryName: string) => {
-  router.push(`/formulas?category=${encodeURIComponent(categoryName)}`)
-}
-
-// 检测屏幕尺寸
-const checkMobile = () => {
-  isMobile.value = window.innerWidth < 768
-}
-
-// 渲染数学公式
-const renderMathJax = async () => {
-  await nextTick()
-  if (heroFormulaRef.value && window.MathJax) {
-    try {
-      await window.MathJax.typesetPromise([heroFormulaRef.value])
-    } catch (error) {
-      console.warn('MathJax rendering failed:', error)
-    }
-  }
-}
-
-onMounted(() => {
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-  renderMathJax()
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', checkMobile)
-})
+// 精选方程（前4个）
+const featuredFormulas = computed(() => formulas.slice(0, 4))
 </script>
 
 <style scoped>
 .home-view {
-  @apply min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900;
+  min-height: 100vh;
+  background: #0a0a0f;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+/* 星空背景 */
+.stars-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(2px 2px at 160px 30px, #ddd, transparent);
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: twinkle 20s linear infinite;
+  z-index: -1;
+}
+
+@keyframes twinkle {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100px); }
 }
 
 /* 英雄区域 */
 .hero-section {
-  @apply relative min-h-screen flex items-center overflow-hidden;
-}
-
-.hero-background {
-  @apply absolute inset-0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-}
-
-.stars {
-  @apply absolute w-full h-full;
-  background-image: 
-    radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
-    radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent);
-  background-repeat: repeat;
-  background-size: 200px 100px;
-  animation: twinkle 4s ease-in-out infinite alternate;
-}
-
-.cosmic-waves {
-  @apply absolute w-full h-full;
-  background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-  animation: pulse-slow 8s ease-in-out infinite;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
 }
 
 .hero-content {
-  @apply relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-}
-
-.hero-text {
-  @apply text-center lg:text-left;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
 }
 
 .hero-title {
-  @apply text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white;
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0e7ff 100%);
+  font-size: 4rem;
+  font-weight: 900;
+  margin-bottom: 2rem;
+  line-height: 1.1;
+}
+
+.glitch-text {
+  display: block;
+  background: linear-gradient(45deg, #00f5ff, #ff00ff, #ffff00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: glitch 3s infinite;
+}
+
+.subtitle {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #64ffda;
+  margin-top: 1rem;
+  opacity: 0.9;
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+}
+
+.hero-description {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  margin-bottom: 3rem;
+  color: #b0bec5;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.btn {
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: linear-gradient(45deg, #00f5ff, #0080ff);
+  color: #0a0a0f;
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 245, 255, 0.5);
+}
+
+.btn-primary.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 245, 255, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(0, 245, 255, 0.6); }
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #64ffda;
+  border: 2px solid #64ffda;
+}
+
+.btn-secondary:hover {
+  background: #64ffda;
+  color: #0a0a0f;
+  box-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #00f5ff;
+  border: 2px solid #00f5ff;
+}
+
+.btn-outline:hover {
+  background: #00f5ff;
+  color: #0a0a0f;
+}
+
+.btn.large {
+  padding: 1.5rem 3rem;
+  font-size: 1.25rem;
+}
+
+/* 全息投影效果 */
+.hologram-container {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  margin: 0 auto;
+}
+
+.hologram-core {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.energy-ring {
+  position: absolute;
+  border: 2px solid;
+  border-radius: 50%;
+  animation: rotate 20s linear infinite;
+}
+
+.ring-1 {
+  width: 150px;
+  height: 150px;
+  border-color: #00f5ff;
+  opacity: 0.8;
+}
+
+.ring-2 {
+  width: 250px;
+  height: 250px;
+  border-color: #64ffda;
+  opacity: 0.6;
+  animation-duration: 30s;
+  animation-direction: reverse;
+}
+
+.ring-3 {
+  width: 350px;
+  height: 350px;
+  border-color: #ff00ff;
+  opacity: 0.4;
+  animation-duration: 40s;
+}
+
+.quantum-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffff00;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ffff00;
+}
+
+.p1 { top: 20%; left: 50%; animation: orbit1 15s linear infinite; }
+.p2 { top: 50%; right: 20%; animation: orbit2 20s linear infinite; }
+.p3 { bottom: 20%; left: 50%; animation: orbit3 25s linear infinite; }
+.p4 { top: 50%; left: 20%; animation: orbit4 18s linear infinite; }
+
+@keyframes orbit1 {
+  from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+}
+
+@keyframes orbit2 {
+  from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+  to { transform: rotate(-360deg) translateX(120px) rotate(360deg); }
+}
+
+@keyframes orbit3 {
+  from { transform: rotate(0deg) translateX(140px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(140px) rotate(-360deg); }
+}
+
+@keyframes orbit4 {
+  from { transform: rotate(0deg) translateX(110px) rotate(0deg); }
+  to { transform: rotate(-360deg) translateX(110px) rotate(360deg); }
+}
+
+.central-core {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.core-glow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, #00f5ff, transparent);
+  border-radius: 50%;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.core-symbol {
+  font-size: 2rem;
+  color: #ffffff;
+  z-index: 1;
+}
+
+@keyframes glow {
+  from { transform: scale(1); opacity: 0.8; }
+  to { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 数据流效果 */
+.hologram-data {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.data-stream {
+  position: absolute;
+  width: 2px;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, #00f5ff, transparent);
+  animation: stream 3s linear infinite;
+}
+
+.stream-1 { left: 20%; animation-delay: 0s; }
+.stream-2 { left: 50%; animation-delay: 1s; }
+.stream-3 { left: 80%; animation-delay: 2s; }
+
+@keyframes stream {
+  0% { transform: translateY(-100px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(400px); opacity: 0; }
+}
+
+/* 统计区域 */
+.stats-section {
+  padding: 6rem 2rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.stats-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.stat-item:hover {
+  transform: translateY(-5px);
+  border-color: rgba(100, 255, 218, 0.5);
+  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.1);
+}
+
+.stat-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #00f5ff;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.stat-description {
+  font-size: 0.875rem;
+  color: #b0bec5;
+}
+
+/* 功能特色 */
+.features-section {
+  padding: 6rem 2rem;
+  background: #0a0a0f;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.section-title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  background: linear-gradient(45deg, #00f5ff, #64ffda);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.hero-subtitle {
-  @apply text-xl md:text-2xl font-light text-white/90 mb-6;
-}
-
-.hero-description {
-  @apply text-lg text-white/80 mb-8 leading-relaxed max-w-2xl;
-}
-
-.hero-stats {
-  @apply flex justify-center lg:justify-start gap-8 mb-8;
-}
-
-.stat-item {
-  @apply text-center;
-}
-
-.stat-number {
-  @apply block text-2xl md:text-3xl font-bold text-white mb-1;
-}
-
-.stat-label {
-  @apply text-sm text-white/70;
-}
-
-.hero-actions {
-  @apply flex flex-col sm:flex-row gap-4 justify-center lg:justify-start;
-}
-
-.cta-button, .secondary-button {
-  @apply px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-3;
-}
-
-.cta-button {
-  @apply bg-white text-purple-600 hover:bg-purple-50 shadow-lg hover:shadow-xl;
-}
-
-.secondary-button {
-  @apply bg-white/10 text-white border-2 border-white/20 hover:bg-white/20 backdrop-blur-sm;
-}
-
-.button-icon {
-  @apply text-xl;
-}
-
-.hero-visual {
-  @apply flex justify-center items-center;
-}
-
-.formula-preview {
-  @apply relative text-center p-8 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl;
-}
-
-.math-formula {
-  @apply text-2xl md:text-3xl text-white mb-4;
-}
-
-.formula-caption {
-  @apply text-white/80 text-lg font-medium;
-}
-
-.formula-animation {
-  @apply absolute inset-0 pointer-events-none;
-}
-
-.particle {
-  @apply absolute w-2 h-2 bg-white/30 rounded-full;
-  animation: float 3s ease-in-out infinite;
-}
-
-.particle:nth-child(1) { top: 10%; left: 10%; }
-.particle:nth-child(2) { top: 20%; right: 15%; }
-.particle:nth-child(3) { bottom: 30%; left: 20%; }
-.particle:nth-child(4) { bottom: 20%; right: 10%; }
-.particle:nth-child(5) { top: 50%; left: 5%; }
-.particle:nth-child(6) { top: 60%; right: 5%; }
-.particle:nth-child(7) { bottom: 50%; left: 50%; }
-.particle:nth-child(8) { top: 30%; left: 60%; }
-.particle:nth-child(9) { bottom: 60%; right: 40%; }
-.particle:nth-child(10) { top: 80%; left: 30%; }
-.particle:nth-child(11) { bottom: 10%; right: 60%; }
-.particle:nth-child(12) { top: 40%; right: 30%; }
-
-/* 特色功能 */
-.features-section {
-  @apply py-20 bg-white dark:bg-gray-900;
-}
-
-.section-title {
-  @apply text-center text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white;
-}
-
 .section-subtitle {
-  @apply text-center text-lg text-gray-600 dark:text-gray-300 mb-16 max-w-2xl mx-auto;
+  font-size: 1.25rem;
+  color: #b0bec5;
 }
 
 .features-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
 }
 
 .feature-card {
-  @apply bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700 text-center transition-all duration-300;
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 3rem;
+  transition: all 0.3s;
+  overflow: hidden;
+}
+
+.card-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card-equations .card-background {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(100, 255, 218, 0.1));
+}
+
+.card-journey .card-background {
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.1), rgba(255, 255, 0, 0.1));
+}
+
+.card-network .card-background {
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.1), rgba(0, 245, 255, 0.1));
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+}
+
+.feature-card:hover .card-background {
+  opacity: 1;
 }
 
 .feature-icon {
-  @apply w-16 h-16 rounded-2xl flex items-center justify-center text-3xl text-white mb-6 mx-auto;
+  font-size: 4rem;
+  margin-bottom: 2rem;
 }
 
 .feature-title {
-  @apply text-xl font-bold text-gray-900 dark:text-white mb-4;
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 1rem;
 }
 
 .feature-description {
-  @apply text-gray-600 dark:text-gray-300 leading-relaxed mb-6;
+  color: #b0bec5;
+  line-height: 1.6;
+  margin-bottom: 2rem;
 }
 
 .feature-stats {
-  @apply mt-4;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
-.feature-stat {
-  @apply inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm font-medium rounded-full;
+.stat {
+  padding: 0.5rem 1rem;
+  background: rgba(100, 255, 218, 0.1);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  border-radius: 20px;
+  font-size: 0.875rem;
+  color: #64ffda;
 }
 
-/* 公式分类 */
-.categories-section {
-  @apply py-20 bg-gray-50 dark:bg-gray-800;
+.feature-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #00f5ff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s;
 }
 
-.categories-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+.feature-link:hover {
+  color: #64ffda;
 }
 
-.category-card {
-  @apply bg-white dark:bg-gray-900 rounded-2xl p-8 border-2 border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl;
+.link-arrow {
+  font-size: 1.5rem;
+  transition: transform 0.3s;
 }
 
-.category-header {
-  @apply flex items-center justify-between mb-6;
+.feature-link:hover .link-arrow {
+  transform: translateX(5px);
 }
 
-.category-icon {
-  @apply w-12 h-12 rounded-xl flex items-center justify-center text-2xl text-white;
+/* 方程预览 */
+.preview-section {
+  padding: 6rem 2rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 }
 
-.category-count {
-  @apply text-sm font-semibold;
+.equations-preview {
+  max-width: 1400px;
+  margin: 0 auto 3rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
 }
 
-.category-name {
-  @apply text-xl font-bold text-gray-900 dark:text-white mb-3;
+.equation-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s;
 }
 
-.category-description {
-  @apply text-gray-600 dark:text-gray-300 leading-relaxed mb-6;
+.equation-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(100, 255, 218, 0.5);
+  box-shadow: 0 10px 30px rgba(100, 255, 218, 0.1);
 }
 
-.category-progress {
-  @apply flex items-center gap-3;
+.equation-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.progress-bar {
-  @apply flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+.equation-id {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(45deg, #00f5ff, #64ffda);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #0a0a0f;
 }
 
-.progress-fill {
-  @apply h-full transition-all duration-1000 ease-out;
+.equation-meta {
+  flex: 1;
 }
 
-.progress-text {
-  @apply text-sm font-medium text-gray-500 dark:text-gray-400;
+.equation-name {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 0 0 0.25rem 0;
 }
 
-/* 学习路径 */
-.learning-section {
-  @apply py-20 bg-white dark:bg-gray-900;
+.equation-category {
+  font-size: 0.875rem;
+  color: #64ffda;
 }
 
-.learning-path {
-  @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8;
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #00ff00;
+  box-shadow: 0 0 10px #00ff00;
+  animation: blink 2s infinite;
 }
 
-.path-step {
-  @apply relative bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 border-l-4 transition-all duration-300 hover:shadow-lg;
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
-.step-number {
-  @apply absolute -left-6 top-8 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg;
+.equation-formula {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
-.step-content {
-  @apply ml-8;
+.formula-display {
+  font-family: 'Times New Roman', serif;
+  font-size: 1.25rem;
+  color: #00f5ff;
 }
 
-.step-title {
-  @apply text-xl font-bold text-gray-900 dark:text-white mb-2;
+.equation-desc {
+  color: #b0bec5;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
 }
 
-.step-description {
-  @apply text-gray-600 dark:text-gray-300 mb-4;
+.equation-actions {
+  display: flex;
+  gap: 1rem;
 }
 
-.step-formulas {
-  @apply flex flex-wrap gap-2;
+.action-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  background: transparent;
+  color: #64ffda;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
-.formula-tag {
-  @apply px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full;
+.action-btn:hover {
+  background: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.5);
 }
 
-.step-progress {
-  @apply mt-4 flex items-center gap-3;
+.preview-actions {
+  text-align: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.step-progress-bar {
-  @apply flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+/* 探索召唤 */
+.cta-section {
+  padding: 6rem 2rem;
+  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.step-progress-fill {
-  @apply h-full transition-all duration-1000 ease-out;
+.cta-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
 }
 
-.step-progress-text {
-  @apply text-sm font-medium text-gray-500 dark:text-gray-400;
+.cta-description {
+  font-size: 1.125rem;
+  color: #b0bec5;
+  line-height: 1.6;
+  margin-bottom: 2rem;
 }
 
-.learning-cta {
-  @apply text-center mt-12;
+.cta-actions {
+  display: flex;
+  gap: 1rem;
 }
 
-.learning-button {
-  @apply px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 mx-auto;
+/* 传送门效果 */
+.portal-effect {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
 }
 
-/* 动画 */
-@keyframes twinkle {
-  0% { opacity: 0.3; }
-  100% { opacity: 1; }
+.portal-ring {
+  position: absolute;
+  border: 3px solid;
+  border-radius: 50%;
+  animation: portalRotate 10s linear infinite;
 }
 
-@keyframes pulse-slow {
-  0%, 100% { transform: scale(1); opacity: 0.1; }
-  50% { transform: scale(1.05); opacity: 0.2; }
+.portal-ring.ring-1 {
+  width: 100px;
+  height: 100px;
+  top: 100px;
+  left: 100px;
+  border-color: #00f5ff;
+  opacity: 0.8;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-10px) rotate(120deg); }
-  66% { transform: translateY(5px) rotate(240deg); }
+.portal-ring.ring-2 {
+  width: 180px;
+  height: 180px;
+  top: 60px;
+  left: 60px;
+  border-color: #64ffda;
+  opacity: 0.6;
+  animation-duration: 15s;
+  animation-direction: reverse;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.portal-ring.ring-3 {
+  width: 260px;
+  height: 260px;
+  top: 20px;
+  left: 20px;
+  border-color: #ff00ff;
+  opacity: 0.4;
+  animation-duration: 20s;
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out both;
+.portal-center {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  top: 120px;
+  left: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #00f5ff, #64ffda);
 }
 
-.hover-scale {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.portal-glow {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 245, 255, 0.8), transparent);
+  animation: portalGlow 3s ease-in-out infinite alternate;
 }
 
-.hover-scale:hover {
-  transform: scale(1.05);
+@keyframes portalRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-.fade-in {
-  animation: fadeInUp 0.8s ease-out;
-}
-
-.slide-up {
-  animation: fadeInUp 0.8s ease-out 0.3s both;
+@keyframes portalGlow {
+  from { transform: scale(1); }
+  to { transform: scale(1.5); }
 }
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
   .hero-content {
-    @apply grid-cols-1 gap-12 text-center;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+  
+  .hologram-container {
+    width: 300px;
+    height: 300px;
   }
   
   .features-grid {
-    @apply grid-cols-1 md:grid-cols-2;
+    grid-template-columns: 1fr;
   }
   
-  .categories-grid {
-    @apply grid-cols-1 md:grid-cols-2;
+  .cta-section {
+    grid-template-columns: 1fr;
+    text-align: center;
   }
 }
 
 @media (max-width: 768px) {
   .hero-title {
-    @apply text-3xl md:text-4xl;
+    font-size: 2.5rem;
   }
   
-  .hero-subtitle {
-    @apply text-lg;
+  .section-title {
+    font-size: 2rem;
   }
   
-  .hero-stats {
-    @apply gap-4;
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
   
-  .stat-number {
-    @apply text-xl;
+  .equations-preview {
+    grid-template-columns: 1fr;
+  }
+  
+  .hologram-container {
+    width: 250px;
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-view {
+    padding: 0 1rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
   
   .hero-actions {
-    @apply flex-col;
-  }
-  
-  .features-grid {
-    @apply grid-cols-1;
-  }
-  
-  .categories-grid {
-    @apply grid-cols-1;
-  }
-  
-  .path-step {
-    @apply text-center;
-  }
-  
-  .step-number {
-    @apply relative left-0 mx-auto mb-4;
-  }
-  
-  .step-content {
-    @apply ml-0;
-  }
-}
-
-@media (max-width: 640px) {
-  .hero-content {
-    @apply px-4;
-  }
-  
-  .math-formula {
-    @apply text-xl;
-  }
-  
-  .feature-card {
-    @apply p-6;
-  }
-  
-  .category-card {
-    @apply p-6;
-  }
-  
-  .path-step {
-    @apply p-6;
-  }
-}
-
-/* 深色模式优化 */
-@media (prefers-color-scheme: dark) {
-  .hero-background {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
-  }
-}
-
-/* 减少动画模式支持 */
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-in-up,
-  .hover-scale,
-  .fade-in,
-  .slide-up {
-    animation: none;
-    transition: none;
-  }
-  
-  .particle {
-    animation: none;
+    flex-direction: column;
   }
 }
 </style>

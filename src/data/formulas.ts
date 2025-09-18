@@ -1,13 +1,6 @@
-export interface Formula {
-  id: number;
-  name: string;
-  description: string;
-  latex: string;
-  category: string;
-  color: string;
-}
+import type { SimpleFormula, FormulaCategory } from '../types/simple-formula'
 
-export const formulas: Formula[] = [
+export const formulas: SimpleFormula[] = [
   {
     id: 1,
     name: "时空同一化方程",
@@ -146,7 +139,7 @@ export const formulas: Formula[] = [
   }
 ];
 
-export const categories = [
+export const categories: FormulaCategory[] = [
   { name: "时空理论", color: "#3B82F6", count: 2 },
   { name: "力学基础", color: "#10B981", count: 4 },
   { name: "统一理论", color: "#F59E0B", count: 2 },
