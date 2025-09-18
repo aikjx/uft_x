@@ -53,6 +53,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useMathJax } from '../composables/useMathJax'
 
 interface Formula {
   id: number
@@ -259,28 +260,18 @@ const getCategoryName = (category: string) => {
   return categoryNames[category as keyof typeof categoryNames] || category
 }
 
-onMounted(() => {
-  // 加载 MathJax
-  if (typeof window !== 'undefined') {
-    const script = document.createElement('script')
-    script.src = 'https://polyfill.io/v3/polyfill.min.js?features=es6'
-    document.head.appendChild(script)
-    
-    const mathJaxScript = document.createElement('script')
-    mathJaxScript.id = 'MathJax-script'
-    mathJaxScript.async = true
-    mathJaxScript.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
-    document.head.appendChild(mathJaxScript)
-    
-    window.MathJax = {
-      tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
-      },
-      svg: {
-        fontCache: 'global'
-      }
-    }
+onMounted(async () => {
+  // 使用统一的 MathJax 管理
+  const { initMathJax, rerenderAll } = useMathJax()
+  
+  try {
+    await initMathJax()
+    // 渲染页面中的所有公式
+    setTimeout(() => {
+      rerenderAll()
+    }, 500)
+  } catch (error) {
+    console.error('MathJax 初始化失败:', error)
   }
 })
 </script>

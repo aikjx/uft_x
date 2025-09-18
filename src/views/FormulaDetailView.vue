@@ -85,6 +85,7 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { formulas } from '../data/formulas'
+import { useMathJax } from '../composables/useMathJax'
 
 const route = useRoute()
 const latexRef = ref<HTMLElement>()
@@ -95,9 +96,17 @@ const formula = computed(() => {
 })
 
 onMounted(async () => {
-  await nextTick()
-  if (latexRef.value && window.MathJax) {
-    window.MathJax.typesetPromise([latexRef.value])
+  const { initMathJax, renderMath } = useMathJax()
+  
+  try {
+    await initMathJax()
+    await nextTick()
+    
+    if (latexRef.value) {
+      await renderMath(latexRef.value)
+    }
+  } catch (error) {
+    console.error('公式渲染失败:', error)
   }
 })
 

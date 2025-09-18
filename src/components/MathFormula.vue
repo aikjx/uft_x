@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick, computed } from 'vue'
+import { ref, onMounted, watch, nextTick, computed, onUnmounted } from 'vue'
 import { useMathJax } from '../composables/useMathJax'
 
 interface Props {
@@ -49,51 +49,99 @@ const props = withDefaults(defineProps<Props>(), {
 const formulaRef = ref<HTMLElement>()
 const isLoading = ref(true)
 const hasError = ref(false)
+const retryCount = ref(0)
+const maxRetries = 3
 
-const { renderMath } = useMathJax()
+const { renderMath, initMathJax, checkMathJax } = useMathJax()
 
 // 格式化公式
 const formattedFormula = computed(() => {
   if (!props.formula) return ''
   
+  // 清理公式字符串
+  const cleanFormula = props.formula.trim()
+  
   if (props.inline) {
-    return `$${props.formula}$`
+    return `$${cleanFormula}$`
   } else {
-    return `$$${props.formula}$$`
+    return `$$${cleanFormula}$$`
   }
 })
 
 // 渲染公式
 const renderFormula = async () => {
-  if (!formulaRef.value || !props.formula) return
+  if (!formulaRef.value || !props.formula) {
+    isLoading.value = false
+    return
+  }
   
   try {
     isLoading.value = true
     hasError.value = false
     
+    // 确保 MathJax 已初始化
+    await initMathJax()
+    
+    // 等待 DOM 更新
     await nextTick()
+    
+    // 检查 MathJax 是否可用
+    if (!checkMathJax()) {
+      throw new Error('MathJax 未准备就绪')
+    }
+    
+    // 渲染公式
     await renderMath(formulaRef.value)
     
     isLoading.value = false
+    retryCount.value = 0
+    
   } catch (error) {
     console.error('公式渲染错误:', error)
-    hasError.value = true
-    isLoading.value = false
+    
+    // 自动重试机制
+    if (retryCount.value < maxRetries) {
+      retryCount.value++
+      setTimeout(() => {
+        renderFormula()
+      }, 1000 * retryCount.value) // 递增延迟
+    } else {
+      hasError.value = true
+      isLoading.value = false
+    }
   }
 }
 
-// 重试渲染
+// 手动重试渲染
 const retry = () => {
+  retryCount.value = 0
   renderFormula()
 }
 
 // 监听公式变化
-watch(() => props.formula, () => {
-  renderFormula()
+watch(() => props.formula, (newFormula, oldFormula) => {
+  if (newFormula !== oldFormula && newFormula) {
+    renderFormula()
+  }
 }, { immediate: false })
 
+// 监听内联模式变化
+watch(() => props.inline, () => {
+  if (props.formula) {
+    renderFormula()
+  }
+})
+
 onMounted(() => {
-  renderFormula()
+  // 延迟一点时间确保 DOM 完全准备好
+  setTimeout(() => {
+    renderFormula()
+  }, 100)
+})
+
+onUnmounted(() => {
+  // 清理工作
+  retryCount.value = 0
 })
 </script>
 
