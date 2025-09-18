@@ -12,14 +12,10 @@
     "vue": "^3.4.0",
     "vue-router": "^4.2.5",
     "pinia": "^2.1.7",
-    "framer-motion": "^10.16.16",
-    "three": "^0.158.0",
-    "gsap": "^3.12.2",
     "d3": "^7.8.5"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "@types/three": "^0.158.0",
     "@types/d3": "^7.4.3",
     "@vitejs/plugin-vue": "^4.5.2",
     "typescript": "^5.2.2",
