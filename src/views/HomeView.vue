@@ -109,7 +109,7 @@
         <div class="feature-card card-journey">
           <div class="card-background"></div>
           <div class="feature-icon">🛸</div>
-          <h3 class="feature-title">星际探索航线</h3>
+          <h3 class="feature-title">星际研究航线</h3>
           <p class="feature-description">
             规划你的星际探索路径，从基础时空理论到高维度星际旅行，
             体验渐进式的宇宙探索之旅

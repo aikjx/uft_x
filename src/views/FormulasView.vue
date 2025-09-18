@@ -146,7 +146,11 @@
             
             <div class="equation-formula">
               <div class="formula-container">
-                <div class="formula-display">{{ formula.latex }}</div>
+                <MathFormula 
+                  :formula="formula.latex" 
+                  color="#00f5ff"
+                  size="large"
+                />
                 <div class="formula-effects">
                   <div class="effect-particle p1"></div>
                   <div class="effect-particle p2"></div>
@@ -202,7 +206,12 @@
           <div class="modal-body">
             <div class="formula-display-section">
               <div class="display-container">
-                <div class="hologram-formula">{{ selectedFormula.latex }}</div>
+                <MathFormula 
+                  :formula="selectedFormula.latex" 
+                  color="#00f5ff"
+                  size="xl"
+                  class="hologram-formula"
+                />
                 <div class="hologram-effects">
                   <div class="energy-field"></div>
                   <div class="quantum-dots">
@@ -275,6 +284,7 @@
 import { ref, computed } from 'vue'
 import { formulas, categories } from '../data/formulas'
 import type { SimpleFormula } from '../types/simple-formula'
+import MathFormula from '../components/MathFormula.vue'
 
 // 响应式数据
 const searchQuery = ref('')

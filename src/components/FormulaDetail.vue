@@ -1,371 +1,218 @@
 <template>
-  <div class="formula-detail-modal" @click="closeModal">
-    <div class="modal-content" @click.stop>
-      <div class="modal-header">
-        <h2 class="modal-title">{{ formula.name }}</h2>
-        <button @click="closeModal" class="close-btn">
-          <span class="close-icon">×</span>
-        </button>
+  <div class="formula-detail">
+    <div class="detail-header">
+      <div class="formula-id">
+        <span class="id-number">{{ String(formula.id).padStart(3, '0') }}</span>
       </div>
-      
-      <div class="modal-body">
-        <div class="formula-display">
-          <div class="formula-number" :style="{ backgroundColor: getFormulaColor(formula.categoryId) }">
-            {{ formula.id }}
-          </div>
-          <div class="formula-latex" ref="mathRef">
-            {{ formula.equation }}
-          </div>
-        </div>
-        
-        <div class="formula-info">
-          <div class="info-section">
-            <h3 class="section-title">公式描述</h3>
-            <p class="section-content">{{ formula.description }}</p>
-          </div>
-          
-          <div class="info-section" v-if="formula.parameters && formula.parameters.length > 0">
-            <h3 class="section-title">参数说明</h3>
-            <div class="variables-list">
-              <div v-for="param in formula.parameters" :key="param.symbol" class="variable-item">
-                <span class="variable-symbol">{{ param.symbol }}</span>
-                <span class="variable-description">{{ param.description }}</span>
-                <span class="variable-unit" v-if="param.unit">({{ param.unit }})</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="info-section" v-if="formula.applications && formula.applications.length > 0">
-            <h3 class="section-title">应用领域</h3>
-            <div class="applications-list">
-              <span v-for="app in formula.applications" :key="app" class="application-tag">
-                {{ app }}
-              </span>
-            </div>
-          </div>
-          
-          <div class="info-section" v-if="formula.relatedFormulas && formula.relatedFormulas.length > 0">
-            <h3 class="section-title">相关公式</h3>
-            <div class="related-formulas">
-              <button 
-                v-for="relatedId in formula.relatedFormulas" 
-                :key="relatedId"
-                @click="viewRelatedFormula(relatedId)"
-                class="related-formula-btn"
-              >
-                公式 {{ relatedId }}
-              </button>
-            </div>
-          </div>
+      <div class="formula-meta">
+        <h2 class="formula-title">{{ formula.name }}</h2>
+        <div class="formula-category" :style="{ color: formula.color }">
+          {{ formula.category }}
         </div>
       </div>
-      
-      <div class="modal-footer">
-        <button @click="toggleBookmark" class="bookmark-btn" :class="{ active: isBookmarked }">
-          <span class="bookmark-icon">{{ isBookmarked ? '★' : '☆' }}</span>
-          {{ isBookmarked ? '已收藏' : '收藏' }}
-        </button>
-        <button @click="shareFormula" class="share-btn">
-          <span class="share-icon">📤</span>
-          分享
-        </button>
-        <button @click="closeModal" class="close-modal-btn">
-          关闭
-        </button>
+    </div>
+    
+    <div class="formula-display-section">
+      <div class="display-container">
+        <MathFormula 
+          :formula="formula.latex" 
+          :color="formula.color"
+          size="xl"
+          class="main-formula"
+        />
       </div>
+    </div>
+    
+    <div class="formula-description">
+      <h3>公式描述</h3>
+      <p>{{ formula.description }}</p>
+    </div>
+    
+    <div class="formula-actions">
+      <button class="action-btn primary" @click="$emit('analyze')">
+        <span class="btn-icon">🔬</span>
+        <span class="btn-text">深度分析</span>
+      </button>
+      <button class="action-btn secondary" @click="$emit('simulate')">
+        <span class="btn-icon">🌌</span>
+        <span class="btn-text">时空模拟</span>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed, watch } from 'vue'
-import type { Formula } from '../types/formula'
+import type { SimpleFormula } from '../types/simple-formula'
+import MathFormula from './MathFormula.vue'
 
-// Props
 interface Props {
-  formula: Formula
-  modelValue: boolean
+  formula: SimpleFormula
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  modelValue: false
-})
+defineProps<Props>()
 
-// Emits
-const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-  'view-formula': [formulaId: number]
+defineEmits<{
+  analyze: []
+  simulate: []
 }>()
-
-// 响应式状态
-const mathRef = ref<HTMLElement>()
-const isBookmarked = ref(false)
-
-// 计算属性
-const isVisible = computed(() => props.modelValue)
-
-// 方法
-const closeModal = () => {
-  emit('update:modelValue', false)
-}
-
-const viewRelatedFormula = (formulaId: string) => {
-  emit('view-formula', parseInt(formulaId))
-}
-
-const toggleBookmark = () => {
-  isBookmarked.value = !isBookmarked.value
-  // 这里可以添加保存到本地存储的逻辑
-  const bookmarks = JSON.parse(localStorage.getItem('formula-bookmarks') || '[]')
-  if (isBookmarked.value) {
-    if (!bookmarks.includes(props.formula.id)) {
-      bookmarks.push(props.formula.id)
-    }
-  } else {
-    const index = bookmarks.indexOf(props.formula.id)
-    if (index > -1) {
-      bookmarks.splice(index, 1)
-    }
-  }
-  localStorage.setItem('formula-bookmarks', JSON.stringify(bookmarks))
-}
-
-const getFormulaColor = (categoryId: string) => {
-  const colors: Record<string, string> = {
-    'basic': '#3B82F6',
-    'mechanics': '#10B981', 
-    'unified': '#8B5CF6',
-    'electromagnetic': '#F59E0B',
-    'advanced': '#EF4444'
-  }
-  return colors[categoryId] || '#6B7280'
-}
-
-const shareFormula = () => {
-  const shareText = `张祥前统一场论 - ${props.formula.name}: ${props.formula.equation}`
-  
-  if (navigator.share) {
-    navigator.share({
-      title: props.formula.name,
-      text: shareText,
-      url: window.location.href
-    })
-  } else {
-    // 复制到剪贴板
-    navigator.clipboard.writeText(shareText).then(() => {
-      alert('公式信息已复制到剪贴板！')
-    })
-  }
-}
-
-const renderMathJax = async () => {
-  await nextTick()
-  if (window.MathJax && mathRef.value) {
-    try {
-      await window.MathJax.typesetPromise([mathRef.value])
-    } catch (error) {
-      console.warn('MathJax rendering failed:', error)
-    }
-  }
-}
-
-// 生命周期
-onMounted(() => {
-  // 检查是否已收藏
-  const bookmarks = JSON.parse(localStorage.getItem('formula-bookmarks') || '[]')
-  isBookmarked.value = bookmarks.includes(props.formula.id)
-  
-  // 渲染数学公式
-  renderMathJax()
-})
-
-// 监听公式变化，重新渲染
-watch(() => props.formula, () => {
-  if (props.formula) {
-    renderMathJax()
-    const bookmarks = JSON.parse(localStorage.getItem('formula-bookmarks') || '[]')
-    isBookmarked.value = bookmarks.includes(props.formula.id)
-  }
-}, { deep: true })
 </script>
 
 <style scoped>
-.formula-detail-modal {
-  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
-  backdrop-filter: blur(4px);
+.formula-detail {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
 }
 
-.modal-content {
-  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden;
-  animation: modalSlideIn 0.3s ease-out;
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.2);
 }
 
-.modal-header {
-  @apply flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700;
+.formula-id {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(45deg, #00f5ff, #64ffda);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.modal-title {
-  @apply text-2xl font-bold text-gray-900 dark:text-white;
+.id-number {
+  font-weight: bold;
+  color: #0a0a0f;
+  font-size: 1.25rem;
 }
 
-.close-btn {
-  @apply w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors duration-200;
+.formula-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
 }
 
-.close-icon {
-  @apply text-2xl text-gray-500 dark:text-gray-400;
+.formula-category {
+  font-size: 1rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(100, 255, 218, 0.1);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  border-radius: 12px;
+  display: inline-block;
 }
 
-.modal-body {
-  @apply p-6 overflow-y-auto max-h-[60vh];
+.formula-display-section {
+  margin-bottom: 2rem;
 }
 
-.formula-display {
-  @apply flex items-center gap-6 mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-xl;
+.display-container {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(100, 255, 218, 0.3);
+  border-radius: 12px;
+  padding: 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.formula-number {
-  @apply w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg;
+.display-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(0, 245, 255, 0.1), transparent);
+  animation: pulse 3s ease-in-out infinite;
 }
 
-.formula-latex {
-  @apply flex-1 text-xl font-mono text-gray-800 dark:text-gray-200 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 overflow-x-auto;
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
 }
 
-.formula-info {
-  @apply space-y-6;
+.formula-description {
+  margin-bottom: 2rem;
 }
 
-.info-section {
-  @apply space-y-3;
+.formula-description h3 {
+  color: #64ffda;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
 }
 
-.section-title {
-  @apply text-lg font-semibold text-gray-900 dark:text-white;
+.formula-description p {
+  color: #b0bec5;
+  line-height: 1.6;
+  font-size: 1rem;
 }
 
-.section-content {
-  @apply text-gray-600 dark:text-gray-300 leading-relaxed;
+.formula-actions {
+  display: flex;
+  gap: 1rem;
 }
 
-.variables-list {
-  @apply space-y-2;
+.action-btn {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: bold;
 }
 
-.variable-item {
-  @apply flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg;
+.action-btn.primary {
+  background: linear-gradient(45deg, #00f5ff, #64ffda);
+  color: #0a0a0f;
 }
 
-.variable-symbol {
-  @apply font-mono font-bold text-blue-600 dark:text-blue-400 min-w-[2rem];
+.action-btn.primary:hover {
+  box-shadow: 0 5px 15px rgba(0, 245, 255, 0.3);
+  transform: translateY(-2px);
 }
 
-.variable-description {
-  @apply flex-1 text-gray-700 dark:text-gray-300;
+.action-btn.secondary {
+  background: transparent;
+  color: #64ffda;
+  border: 2px solid rgba(100, 255, 218, 0.3);
 }
 
-.variable-unit {
-  @apply text-sm text-gray-500 dark:text-gray-400 font-mono;
+.action-btn.secondary:hover {
+  background: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.5);
 }
 
-.applications-list {
-  @apply flex flex-wrap gap-2;
+.btn-icon {
+  font-size: 1.25rem;
 }
 
-.application-tag {
-  @apply px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium;
+.btn-text {
+  font-size: 1rem;
 }
 
-.related-formulas {
-  @apply flex flex-wrap gap-2;
-}
-
-.related-formula-btn {
-  @apply px-4 py-2 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-lg text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors duration-200;
-}
-
-.modal-footer {
-  @apply flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700;
-}
-
-.bookmark-btn, .share-btn, .close-modal-btn {
-  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2;
-}
-
-.bookmark-btn {
-  @apply bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 hover:bg-yellow-200 dark:hover:bg-yellow-800;
-}
-
-.bookmark-btn.active {
-  @apply bg-yellow-500 text-white hover:bg-yellow-600;
-}
-
-.share-btn {
-  @apply bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800;
-}
-
-.close-modal-btn {
-  @apply bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500;
-}
-
-.bookmark-icon, .share-icon {
-  @apply text-lg;
-}
-
-/* 动画 */
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* 响应式设计 */
 @media (max-width: 768px) {
-  .modal-content {
-    @apply max-w-full m-2;
+  .detail-header {
+    flex-direction: column;
+    text-align: center;
   }
   
-  .formula-display {
-    @apply flex-col items-start gap-4;
+  .formula-actions {
+    flex-direction: column;
   }
   
-  .formula-number {
-    @apply w-12 h-12 text-lg;
-  }
-  
-  .formula-latex {
-    @apply text-lg;
-  }
-  
-  .modal-footer {
-    @apply flex-col gap-2;
-  }
-  
-  .bookmark-btn, .share-btn, .close-modal-btn {
-    @apply w-full justify-center;
-  }
-}
-
-/* 深色模式优化 */
-@media (prefers-color-scheme: dark) {
-  .formula-detail-modal {
-    backdrop-filter: blur(8px);
-  }
-}
-
-/* 减少动画模式支持 */
-@media (prefers-reduced-motion: reduce) {
-  .modal-content {
-    animation: none;
-  }
-  
-  .bookmark-btn, .share-btn, .close-modal-btn, .related-formula-btn, .close-btn {
-    transition: none;
+  .display-container {
+    padding: 2rem 1rem;
   }
 }
 </style>

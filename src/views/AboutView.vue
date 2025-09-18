@@ -11,12 +11,12 @@
         <h2 class="section-title">项目简介</h2>
         <div class="section-content">
           <p class="intro-text">
-            UTF Star 是一个专门为张祥前统一场论设计的可视化学习平台。
+            UTF Star 是一个专门为张祥前统一场论设计的可视化研究平台。
             通过现代化的交互界面和精美的数学公式渲染，让复杂的物理理论变得直观易懂。
           </p>
           <p class="intro-text">
             我们致力于将深奥的统一场论知识以最优雅的方式呈现，
-            帮助学习者更好地理解宇宙的统一性和物理定律的内在联系。
+            帮助研究者更好地理解宇宙的统一性和物理定律的内在联系。
           </p>
         </div>
       </section>
@@ -148,13 +148,13 @@ const features = [
     icon: '📐'
   },
   {
-    title: '交互式学习',
+    title: '交互式研究',
     description: '点击查看详细解释，理解公式的物理意义',
     icon: '🎯'
   },
   {
     title: '分类筛选',
-    description: '按照理论类别筛选公式，系统化学习',
+    description: '按照理论类别筛选公式，系统化研究',
     icon: '🔍'
   },
   {
@@ -163,13 +163,13 @@ const features = [
     icon: '🕸️'
   },
   {
-    title: '学习路径',
-    description: '循序渐进的学习建议，从基础到高级',
+    title: '探索路径',
+    description: '循序渐进的研究建议，从基础到高级',
     icon: '🛤️'
   },
   {
     title: '响应式设计',
-    description: '完美适配各种设备，随时随地学习',
+    description: '完美适配各种设备，随时随地研究',
     icon: '📱'
   }
 ]

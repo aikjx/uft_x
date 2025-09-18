@@ -61,8 +61,8 @@
             <router-link to="/learning-path" class="helpful-link">
               <div class="link-icon">📚</div>
               <div class="link-content">
-                <h4>学习路径</h4>
-                <p>按顺序学习理论知识</p>
+                <h4>探索路径</h4>
+                <p>按顺序研究理论知识</p>
               </div>
             </router-link>
             

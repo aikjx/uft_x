@@ -15,7 +15,7 @@
       <div class="header-content">
         <h1 class="page-title">
           <span class="title-icon">🚀</span>
-          星际探索航线图
+          星际研究航线图
         </h1>
         <p class="page-subtitle">
           穿越时空维度 · 探索人工场奥秘 · 开启光速虚拟时代的星际之旅
@@ -336,7 +336,7 @@ const explorationRoutes = ref([
   {
     id: 'electromagnetic',
     name: '电磁场操控',
-    description: '学习电磁场的时空操控技术',
+    description: '研究电磁场的时空操控技术',
     icon: '⚡',
     progress: 60
   },
@@ -386,7 +386,7 @@ const missions = ref<MissionData>({
       difficulty: 'intermediate',
       description: '深入分析时空的基本结构，理解维度的概念。',
       objectives: [
-        { text: '学习时空几何', completed: true },
+        { text: '研究时空几何', completed: true },
         { text: '理解维度理论', completed: true },
         { text: '完成实践练习', completed: false }
       ],
@@ -402,7 +402,7 @@ const missions = ref<MissionData>({
       level: 3,
       status: 'available',
       difficulty: 'advanced',
-      description: '学习推导人工场的基本方程，掌握数学推理过程。',
+      description: '研究推导人工场的基本方程，掌握数学推理过程。',
       objectives: [
         { text: '掌握微分几何', completed: false },
         { text: '推导场方程', completed: false },

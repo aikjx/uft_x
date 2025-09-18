@@ -18,8 +18,12 @@
     
     <h3 class="formula-title">{{ formula.name }}</h3>
     
-    <div class="formula-latex" ref="latexRef">
-      ${{ formula.latex }}$
+    <div class="formula-latex">
+      <MathFormula 
+        :formula="formula.latex" 
+        :color="formula.color"
+        size="medium"
+      />
     </div>
     
     <p class="formula-description">{{ formula.description }}</p>
@@ -34,8 +38,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref } from 'vue'
 import type { SimpleFormula } from '../types/simple-formula'
+import MathFormula from './MathFormula.vue'
 
 interface Props {
   formula: SimpleFormula
@@ -49,15 +54,6 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   select: [formula: SimpleFormula]
 }>()
-
-const latexRef = ref<HTMLElement>()
-
-onMounted(async () => {
-  await nextTick()
-  if (latexRef.value && window.MathJax) {
-    window.MathJax.typesetPromise([latexRef.value])
-  }
-})
 </script>
 
 <style scoped>

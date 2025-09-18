@@ -60,7 +60,7 @@ const isDark = ref(false)
 const navLinks = [
   { name: '首页', path: '/' },
   { name: '公式总览', path: '/formulas' },
-  { name: '学习路径', path: '/learning-path' },
+  { name: '探索路径', path: '/learning-path' },
   { name: '关系图谱', path: '/relationships' }
 ]
 
@@ -72,11 +72,18 @@ const toggleTheme = () => {
 
 <style scoped>
 .app-layout {
-  @apply min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800;
+  min-height: 100vh;
+  background: #0a0a0f;
+  color: #ffffff;
 }
 
 .navbar {
-  @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50;
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(100, 255, 218, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
 .nav-container {
@@ -96,7 +103,13 @@ const toggleTheme = () => {
 }
 
 .logo-text {
-  @apply text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+  font-size: 1.5rem;
+  font-weight: 900;
+  background: linear-gradient(45deg, #00f5ff, #64ffda);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
 }
 
 .nav-links {
@@ -104,11 +117,36 @@ const toggleTheme = () => {
 }
 
 .nav-link {
-  @apply text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium no-underline transition-colors;
+  color: #b0bec5;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #00f5ff;
+  background: rgba(0, 245, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
 }
 
 .nav-link.active {
-  @apply text-blue-600 dark:text-blue-400;
+  color: #00f5ff;
+  background: rgba(0, 245, 255, 0.15);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00f5ff, transparent);
 }
 
 .nav-actions {
@@ -116,7 +154,20 @@ const toggleTheme = () => {
 }
 
 .theme-toggle {
-  @apply p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xl;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  color: #64ffda;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.5);
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.2);
 }
 
 .main-content {
@@ -124,15 +175,25 @@ const toggleTheme = () => {
 }
 
 .footer {
-  @apply bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 py-8 mt-16;
+  background: rgba(26, 26, 46, 0.8);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(100, 255, 218, 0.2);
+  padding: 2rem 0;
+  margin-top: 4rem;
 }
 
 .footer-content {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: center;
+  color: #b0bec5;
 }
 
 .footer-subtitle {
-  @apply text-sm text-gray-500 dark:text-gray-400 mt-2;
+  font-size: 0.875rem;
+  color: #64ffda;
+  margin-top: 0.5rem;
 }
 
 /* 动画类 */

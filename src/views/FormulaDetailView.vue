@@ -72,8 +72,8 @@
           </div>
 
           <div class="sidebar-section animate-slide-up" style="animation-delay: 0.6s">
-            <h3 class="sidebar-title">学习建议</h3>
-            <p class="sidebar-text">{{ getLearningTips(formula.id) }}</p>
+            <h3 class="sidebar-title">研究建议</h3>
+            <p class="sidebar-text">{{ getResearchTips(formula.id) }}</p>
           </div>
         </div>
       </div>
@@ -161,14 +161,14 @@ const getRelatedFormulas = (formulaId: number): number[] => {
   return relations[formulaId] || []
 }
 
-const getLearningTips = (formulaId: number): string => {
+const getResearchTips = (formulaId: number): string => {
   const tips: Record<number, string> = {
-    1: '建议先理解经典时空概念，然后逐步理解时空统一的思想。可以结合相对论的时空观来加深理解。',
-    2: '需要具备一定的微分几何基础，建议先学习螺旋线的数学描述，再理解其在时空中的物理意义。',
-    3: '建议先复习经典力学中的质量概念，然后理解这个新定义如何统一了质量和空间的关系。',
-    // 可以继续添加其他公式的学习建议
+    1: '建议先理解经典时空概念，然后逐步研究时空统一的思想。可以结合相对论的时空观来加深理解。',
+    2: '需要具备一定的微分几何基础，建议先研究螺旋线的数学描述，再理解其在时空中的物理意义。',
+    3: '建议先复习经典力学中的质量概念，然后研究这个新定义如何统一了质量和空间的关系。',
+    // 可以继续添加其他公式的研究建议
   }
-  return tips[formulaId] || '建议结合其他相关公式一起学习，理解它们之间的内在联系，这样能更好地掌握统一场论的整体思想。'
+  return tips[formulaId] || '建议结合其他相关公式一起研究，理解它们之间的内在联系，这样能更好地掌握统一场论的整体思想。'
 }
 </script>
 
