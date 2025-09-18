@@ -171,7 +171,11 @@ const toggleTheme = () => {
 }
 
 .main-content {
-  @apply flex-1 container mx-auto px-4 sm:px-6 lg:px-8;
+  flex: 1;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0;
 }
 
 .footer {

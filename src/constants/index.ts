@@ -99,7 +99,7 @@ export const FORMULA_CONFIG = {
 
 // MathJax 配置常量
 export const MATHJAX_CONFIG = {
-  CDN_URL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js',
+  CDN_URL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
   CONFIG: {
     tex: {
       inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -108,8 +108,8 @@ export const MATHJAX_CONFIG = {
       processEnvironments: true,
       packages: { '[+]': ['ams', 'newcommand', 'configmacros'] }
     },
-    svg: {
-      fontCache: 'global'
+    chtml: {
+      fontURL: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
     },
     options: {
       skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],

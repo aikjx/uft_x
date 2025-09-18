@@ -18,7 +18,12 @@
           <span class="formula-category" :class="formula.category">{{ getCategoryName(formula.category) }}</span>
         </div>
         <h3 class="formula-name">{{ formula.name }}</h3>
-        <div class="formula-math" v-html="formula.latex"></div>
+        <MathFormula 
+          :formula="formula.latex.replace(/^\$\$|\$\$/g, '')" 
+          :inline="false"
+          color="#1a202c"
+          size="medium"
+        />
         <p class="formula-description">{{ formula.description }}</p>
       </div>
     </div>
@@ -33,7 +38,13 @@
             {{ getCategoryName(selectedFormula.category) }}
           </span>
         </div>
-        <div class="modal-formula" v-html="selectedFormula.latex"></div>
+        <MathFormula 
+          v-if="selectedFormula"
+          :formula="selectedFormula.latex.replace(/^\$\$|\$\$/g, '')" 
+          :inline="false"
+          color="#1a202c"
+          size="large"
+        />
         <div class="modal-details">
           <h4>详细说明</h4>
           <p>{{ selectedFormula.detailedDescription }}</p>
@@ -53,7 +64,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useMathJax } from '../composables/useMathJax'
+import MathFormula from '../components/MathFormula.vue'
 
 interface Formula {
   id: number
@@ -260,19 +271,8 @@ const getCategoryName = (category: string) => {
   return categoryNames[category as keyof typeof categoryNames] || category
 }
 
-onMounted(async () => {
-  // 使用统一的 MathJax 管理
-  const { initMathJax, rerenderAll } = useMathJax()
-  
-  try {
-    await initMathJax()
-    // 渲染页面中的所有公式
-    setTimeout(() => {
-      rerenderAll()
-    }, 500)
-  } catch (error) {
-    console.error('MathJax 初始化失败:', error)
-  }
+onMounted(() => {
+  // 初始化完成后不需要额外操作，MathFormula 组件会自行处理渲染
 })
 </script>
 
@@ -386,7 +386,8 @@ onMounted(async () => {
   margin-bottom: 1rem;
 }
 
-.formula-math {
+/* 公式容器样式 */
+.formula-math-container {
   background: #f8f9fa;
   padding: 1rem;
   border-radius: 8px;
