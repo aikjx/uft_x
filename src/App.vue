@@ -7,15 +7,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import AppLayout from './components/Layout/AppLayout.vue'
-import { useTheme } from './composables/useTheme'
+import { computed } from 'vue'
+import { default as AppLayout } from './components/Layout/AppLayout.vue'
+import { useThemeStore } from './stores/theme'
 
-const { themeClass, initTheme } = useTheme()
+const themeStore = useThemeStore()
 
-onMounted(() => {
-  initTheme()
-})
+const themeClass = computed(() => themeStore.isDark ? 'theme-dark' : 'theme-light')
 </script>
 
 <style>

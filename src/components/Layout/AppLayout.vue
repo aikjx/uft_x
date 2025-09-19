@@ -51,23 +51,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, onMounted, defineExpose } from 'vue'
 import { useRoute } from 'vue-router'
+import { useThemeStore } from '@/stores/theme'
 
 const route = useRoute()
-const isDark = ref(false)
+const themeStore = useThemeStore()
 
 const navLinks = [
   { name: '首页', path: '/' },
   { name: '公式总览', path: '/formulas' },
-  { name: '探索路径', path: '/learning-path' },
-  { name: '关系图谱', path: '/relationships' }
+  { name: '测试公式', path: '/test-formula' },
+  { name: '关于', path: '/about' }
 ]
 
+const isDark = computed(() => themeStore.isDark)
+
 const toggleTheme = () => {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
+  themeStore.toggleTheme()
 }
+
+onMounted(() => {
+  themeStore.initTheme()
+  themeStore.watchSystemTheme()
+})
+
+defineExpose({
+  isDark,
+  toggleTheme,
+  navLinks
+})
 </script>
 
 <style scoped>

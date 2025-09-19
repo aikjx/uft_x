@@ -1,111 +1,79 @@
+// 完整的公式类型定义（与 simple-formula.ts 保持一致）
 export interface Formula {
-  id: string
+  id: number
   name: string
   description: string
-  equation: string
-  categoryId: string
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
-  keywords: string[]
-  relatedFormulas?: string[]
-  parameters: FormulaParameter[]
-  visualization: VisualizationConfig
-  theory: {
-    background: string
-    significance: string
-    applications: string[]
-  }
-  examples: FormulaExample[]
-  references: Reference[]
-}
-
-export interface FormulaParameter {
-  name: string
-  symbol: string
-  description: string
-  unit?: string
-  defaultValue: number
-  min: number
-  max: number
-  step: number
-  type: 'slider' | 'input' | 'select'
-  options?: { label: string; value: number }[]
-}
-
-export interface VisualizationConfig {
-  type: '3d' | '2d' | 'graph' | 'animation'
-  renderer: 'three' | 'canvas' | 'd3' | 'svg'
-  dimensions: {
-    width: number
-    height: number
-  }
-  camera?: {
-    position: [number, number, number]
-    target: [number, number, number]
-    fov: number
-  }
-  lighting?: {
-    ambient: number
-    directional: {
-      color: string
-      intensity: number
-      position: [number, number, number]
-    }[]
-  }
-  materials?: {
-    [key: string]: {
-      color: string
-      opacity: number
-      metalness?: number
-      roughness?: number
-    }
-  }
-  animations?: {
-    name: string
-    duration: number
-    loop: boolean
-    autoplay: boolean
-  }[]
-}
-
-export interface FormulaExample {
-  title: string
-  description: string
-  parameters: { [key: string]: number }
-  expectedResult: string
-  explanation: string
-}
-
-export interface Reference {
-  title: string
-  author: string
-  year: number
-  url?: string
-  type: 'paper' | 'book' | 'website' | 'video'
+  latex: string
+  category: string
+  color: string
+  keywords?: string[]
+  relatedFormulas?: number[]
+  difficulty?: 'easy' | 'medium' | 'hard'
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface FormulaCategory {
-  id: string
   name: string
+  color: string
+  count: number
+  description?: string
+  icon?: string
+}
+
+// 学习路径相关类型
+export interface LearningLevel {
+  title: string
   description: string
   color: string
-  icon: string
-  order: number
+  formulas: Formula[]
+  completed: boolean
+  progress: number
 }
 
-export interface VisualizationState {
-  isPlaying: boolean
-  currentTime: number
-  parameters: { [key: string]: number }
-  viewMode: 'default' | 'wireframe' | 'points'
-  showAxes: boolean
-  showGrid: boolean
-  showLabels: boolean
+// 关系图谱相关类型
+export interface FormulaNode extends Formula {
+  x?: number
+  y?: number
+  fx?: number
+  fy?: number
 }
 
-export interface FormulaRelationship {
-  fromId: string
-  toId: string
-  type: 'derives' | 'related' | 'prerequisite' | 'application'
-  description: string
-  strength: number // 0-1, 关系强度
+export interface FormulaLink {
+  source: FormulaNode
+  target: FormulaNode
+  strength: number
+  type: string
+}
+
+// 搜索相关类型
+export interface SearchResult {
+  formulas: Formula[]
+  categories: FormulaCategory[]
+  total: number
+  query: string
+}
+
+// API 响应类型
+export interface ApiResponse<T = any> {
+  data: T
+  message: string
+  success: boolean
+  timestamp: string
+}
+
+// 分页类型
+export interface PaginationParams {
+  page: number
+  limit: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
 }

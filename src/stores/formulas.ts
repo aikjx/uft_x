@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import type { Formula, FormulaCategory } from '@/types/formula'
+import type { SimpleFormula, FormulaCategory } from '@/types/simple-formula'
+import { formulas, categories } from '@/data/formulas'
 
 export const useFormulasStore = defineStore('formulas', () => {
-  const formulas = ref<Formula[]>([])
-  const categories = ref<FormulaCategory[]>([])
-  const currentFormula = ref<Formula | null>(null)
+  const formulaList = ref<SimpleFormula[]>([])
+  const categoryList = ref<FormulaCategory[]>([])
+  const currentFormula = ref<SimpleFormula | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
   
@@ -14,10 +15,9 @@ export const useFormulasStore = defineStore('formulas', () => {
     error.value = null
     
     try {
-      // 这里将来可以从API获取数据
-      const formulaData = await import('@/data/formulas.json')
-      formulas.value = formulaData.formulas
-      categories.value = formulaData.categories
+      // 使用本地数据
+      formulaList.value = formulas as SimpleFormula[]
+      categoryList.value = categories
     } catch (err) {
       error.value = '加载公式数据失败'
       console.error('Failed to load formulas:', err)
@@ -27,64 +27,73 @@ export const useFormulasStore = defineStore('formulas', () => {
   }
   
   // 根据ID获取公式
-  const getFormulaById = (id: string): Formula | undefined => {
-    return formulas.value.find(formula => formula.id === id)
+  const getFormulaById = (id: number): SimpleFormula | undefined => {
+    return formulaList.value.find(formula => formula.id === id)
   }
   
   // 根据分类获取公式
-  const getFormulasByCategory = (categoryId: string): Formula[] => {
-    return formulas.value.filter(formula => formula.categoryId === categoryId)
+  const getFormulasByCategory = (categoryName: string): SimpleFormula[] => {
+    return formulaList.value.filter(formula => formula.category === categoryName)
   }
   
   // 搜索公式
-  const searchFormulas = (query: string): Formula[] => {
+  const searchFormulas = (query: string): SimpleFormula[] => {
     const lowercaseQuery = query.toLowerCase()
-    return formulas.value.filter(formula => 
+    return formulaList.value.filter(formula => 
       formula.name.toLowerCase().includes(lowercaseQuery) ||
-      formula.description.toLowerCase().includes(lowercaseQuery) ||
-      formula.keywords.some(keyword => keyword.toLowerCase().includes(lowercaseQuery))
+      formula.description.toLowerCase().includes(lowercaseQuery)
     )
   }
   
   // 设置当前公式
-  const setCurrentFormula = (formula: Formula | null) => {
+  const setCurrentFormula = (formula: SimpleFormula | null) => {
     currentFormula.value = formula
   }
   
-  // 获取相关公式
-  const getRelatedFormulas = (formulaId: string): Formula[] => {
+  // 获取相关公式（基于相同分类）
+  const getRelatedFormulas = (formulaId: number): SimpleFormula[] => {
     const formula = getFormulaById(formulaId)
     if (!formula) return []
     
-    return formulas.value.filter(f => 
+    return formulaList.value.filter(f => 
       f.id !== formulaId && 
-      (f.categoryId === formula.categoryId || 
-       f.relatedFormulas?.includes(formulaId) ||
-       formula.relatedFormulas?.includes(f.id))
-    ).slice(0, 5)
+      f.category === formula.category
+    ).slice(0, 4)
   }
   
   // 获取学习路径中的下一个公式
-  const getNextFormula = (currentId: string): Formula | null => {
-    const currentIndex = formulas.value.findIndex(f => f.id === currentId)
-    if (currentIndex === -1 || currentIndex === formulas.value.length - 1) {
+  const getNextFormula = (currentId: number): SimpleFormula | null => {
+    const currentIndex = formulaList.value.findIndex(f => f.id === currentId)
+    if (currentIndex === -1 || currentIndex === formulaList.value.length - 1) {
       return null
     }
-    return formulas.value[currentIndex + 1]
+    return formulaList.value[currentIndex + 1]
   }
   
   // 获取学习路径中的上一个公式
-  const getPreviousFormula = (currentId: string): Formula | null => {
-    const currentIndex = formulas.value.findIndex(f => f.id === currentId)
+  const getPreviousFormula = (currentId: number): SimpleFormula | null => {
+    const currentIndex = formulaList.value.findIndex(f => f.id === currentId)
     if (currentIndex <= 0) {
       return null
     }
-    return formulas.value[currentIndex - 1]
+    return formulaList.value[currentIndex - 1]
   }
   
+  // 获取所有分类
+  const getAllCategories = computed(() => categoryList.value)
+  
+  // 获取每个分类的公式数量
+  const getCategoryStats = computed(() => {
+    const stats: Record<string, number> = {}
+    formulaList.value.forEach(formula => {
+      stats[formula.category] = (stats[formula.category] || 0) + 1
+    })
+    return stats
+  })
+  
   return {
-    formulas: readonly(formulas),
-    categories: readonly(categories),
+    formulas: readonly(formulaList),
+    categories: readonly(categoryList),
     currentFormula: readonly(currentFormula),
     loading: readonly(loading),
     error: readonly(error),
@@ -95,6 +104,8 @@ export const useFormulasStore = defineStore('formulas', () => {
     setCurrentFormula,
     getRelatedFormulas,
     getNextFormula,
-    getPreviousFormula
+    getPreviousFormula,
+    getAllCategories,
+    getCategoryStats
   }
 })

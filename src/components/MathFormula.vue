@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import { useMathJax } from '../composables/useMathJax'
+
 export default {
   name: 'MathFormula',
   
@@ -69,6 +71,11 @@ export default {
     }
   },
   
+  setup() {
+    const { renderMath, checkMathJax } = useMathJax()
+    return { renderMath, checkMathJax }
+  },
+  
   data() {
     return {
       isLoading: true,
@@ -83,7 +90,8 @@ export default {
     formattedFormula() {
       if (!this.formula.trim()) return ''
       const cleanFormula = this.formula.trim()
-      return this.inline ? `$${cleanFormula}$` : `$$${cleanFormula}$$`
+      // MathJax 会自动处理公式分隔符，不需要额外添加 $
+      return cleanFormula
     }
   },
   
@@ -136,11 +144,19 @@ export default {
         this.isLoading = true
         this.hasError = false
         
-        // 简单的渲染逻辑 - 实际项目中应该使用 MathJax
         await this.$nextTick()
         
-        // 模拟渲染延迟
-        await new Promise(resolve => setTimeout(resolve, 50))
+        if (!this.$refs.formulaContainer) {
+          throw new Error('公式容器未找到')
+        }
+        
+        // 检查MathJax是否可用
+        if (!this.checkMathJax()) {
+          throw new Error('MathJax未加载，请检查index.html配置')
+        }
+        
+        // 使用MathJax渲染公式
+        await this.renderMath(this.$refs.formulaContainer)
         
         this.isLoading = false
         this.retryCount = 0
