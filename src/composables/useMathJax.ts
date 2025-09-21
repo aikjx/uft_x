@@ -60,6 +60,30 @@ export function useMathJax() {
     return Promise.resolve()
   }
 
+  // 处理公式文本，修复可能的编码问题
+  const processFormulaText = (element: HTMLElement): void => {
+    // 查找所有公式内容
+    const formulaElements = element.querySelectorAll('.formula-content, .tex2jax_process')
+    
+    formulaElements.forEach(el => {
+      if (el.textContent) {
+        // 确保公式文本使用正确的编码
+        const text = el.textContent
+          // 替换可能导致乱码的特殊字符
+          .replace(/[\u2018\u2019]/g, "'")
+          .replace(/[\u201C\u201D]/g, '"')
+          .replace(/[\u2013\u2014]/g, '-')
+          .replace(/\u2026/g, '...')
+          // 确保数学符号正确显示
+          .replace(/\\infty/g, '\\infty ')
+          .replace(/\\sum/g, '\\sum ')
+          .replace(/\\int/g, '\\int ')
+          
+        el.textContent = text
+      }
+    })
+  }
+
   // 渲染数学公式
   const renderMath = async (element: HTMLElement | HTMLElement[]): Promise<void> => {
     try {
@@ -72,6 +96,9 @@ export function useMathJax() {
       }
 
       const elements = Array.isArray(element) ? element : [element]
+
+      // 处理每个元素的公式文本，修复可能的编码问题
+      elements.forEach(el => processFormulaText(el))
 
       // 清理之前的渲染
       elements.forEach(el => {

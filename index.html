@@ -33,6 +33,24 @@
           processHtmlClass: 'tex2jax_process',
           renderActions: {
             addMenu: [0, '', '']
+          },
+          // 添加字符编码设置
+          menuOptions: {
+            settings: {
+              renderer: 'CHTML',
+              fontCache: true,
+              scale: 1,
+              matchFontHeight: true,
+              mtextInheritFont: false,
+              assistiveMml: true,
+              enableMenu: true,
+              // 设置字符编码
+              chtml: {
+                fontFamily: 'STIX-Web, STIX Two Math, STIX, STIXGeneral, serif',
+                matchFontHeight: true,
+                scale: 1
+              }
+            }
           }
         },
         startup: {

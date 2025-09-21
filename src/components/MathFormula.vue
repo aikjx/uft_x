@@ -32,7 +32,8 @@
       class="formula-content"
       :class="{ 'tex2jax_process': true }"
       aria-label="数学公式"
-    >{{ formattedFormula }}</div>
+      v-html="sanitizedFormula"
+    ></div>
   </div>
 </template>
 
@@ -102,6 +103,24 @@ export default {
       } else {
         return `$$${cleanFormula}$$`
       }
+    },
+    
+    sanitizedFormula() {
+      if (!this.formattedFormula) return ''
+      
+      // 处理可能导致乱码的字符
+      return this.formattedFormula
+        // 替换可能导致乱码的特殊字符
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/\u2026/g, '...')
+        // 确保数学符号正确显示
+        .replace(/\\infty/g, '\\infty ')
+        .replace(/\\sum/g, '\\sum ')
+        .replace(/\\int/g, '\\int ')
+        // 添加空格以防止符号连接导致的乱码
+        .replace(/([^\\])([\+\-\*\/\=])/g, '$1 $2 ')
     }
   },
   
