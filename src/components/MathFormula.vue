@@ -31,9 +31,8 @@
       v-else 
       class="formula-content"
       :class="{ 'tex2jax_process': true }"
-      v-html="formattedFormula"
       aria-label="数学公式"
-    ></div>
+    >{{ formattedFormula }}</div>
   </div>
 </template>
 
@@ -90,8 +89,19 @@ export default {
     formattedFormula() {
       if (!this.formula.trim()) return ''
       const cleanFormula = this.formula.trim()
-      // MathJax 会自动处理公式分隔符，不需要额外添加 $
-      return cleanFormula
+      
+      // 如果公式已经有分隔符，直接返回
+      if (cleanFormula.startsWith('$$') || cleanFormula.startsWith('\\[') || 
+          cleanFormula.startsWith('\\(') || cleanFormula.startsWith('$')) {
+        return cleanFormula
+      }
+      
+      // 根据 inline 属性添加适当的分隔符
+      if (this.inline) {
+        return `\\(${cleanFormula}\\)`
+      } else {
+        return `$$${cleanFormula}$$`
+      }
     }
   },
   

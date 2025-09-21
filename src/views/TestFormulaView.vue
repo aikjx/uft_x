@@ -86,6 +86,12 @@
         </div>
       </section>
 
+      <!-- 调试信息 -->
+      <section class="test-section">
+        <h2>调试信息</h2>
+        <MathJaxDebug />
+      </section>
+
       <!-- 状态显示 -->
       <section class="test-section">
         <h2>MathJax 状态</h2>
@@ -117,6 +123,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import MathFormula from '../components/MathFormula.vue'
+import MathJaxDebug from '../components/MathJaxDebug.vue'
 import { useMathJax } from '../composables/useMathJax'
 
 const mathJaxLoaded = ref(false)

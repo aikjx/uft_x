@@ -8,11 +8,11 @@ const loadPromise = ref<Promise<void> | null>(null)
 export function useMathJax() {
   // 检查 MathJax 是否已加载
   const checkMathJax = (): boolean => {
-    return typeof window !== 'undefined' && 
-           window.MathJax && 
-           window.MathJax.typesetPromise &&
-           window.MathJax.startup &&
-           window.MathJax.startup.document
+    return typeof window !== 'undefined' &&
+      window.MathJax &&
+      window.MathJax.typesetPromise &&
+      window.MathJax.startup &&
+      window.MathJax.startup.document
   }
 
   // 等待 MathJax 加载
@@ -40,7 +40,7 @@ export function useMathJax() {
             resolve()
           }
         }, 100)
-        
+
         // 10秒超时
         setTimeout(() => {
           clearInterval(checkInterval)
@@ -65,24 +65,29 @@ export function useMathJax() {
     try {
       await waitForMathJax()
       await nextTick()
-      
+
       if (!checkMathJax()) {
         console.warn('MathJax 未准备就绪，跳过渲染')
         return
       }
 
       const elements = Array.isArray(element) ? element : [element]
-      
+
       // 清理之前的渲染
       elements.forEach(el => {
-        if (el && window.MathJax.startup.document) {
-          window.MathJax.startup.document.clear()
+        if (el && window.MathJax.startup && window.MathJax.startup.document) {
+          try {
+            window.MathJax.startup.document.clear()
+          } catch (clearError) {
+            console.warn('清理MathJax缓存失败:', clearError)
+          }
         }
       })
 
       // 渲染新内容
       await window.MathJax.typesetPromise(elements)
-      
+      console.log('MathJax 渲染成功')
+
     } catch (error) {
       console.error('MathJax 渲染失败:', error)
       throw error
@@ -93,7 +98,7 @@ export function useMathJax() {
   const rerenderAll = async (): Promise<void> => {
     try {
       await waitForMathJax()
-      
+
       if (!checkMathJax()) {
         console.warn('MathJax 未准备就绪，跳过全局渲染')
         return
@@ -106,7 +111,7 @@ export function useMathJax() {
 
       // 重新渲染整个文档
       await window.MathJax.typesetPromise()
-      
+
     } catch (error) {
       console.error('MathJax 全局重新渲染失败:', error)
     }
@@ -126,7 +131,7 @@ export function useMathJax() {
     }
 
     isLoading.value = true
-    
+
     try {
       await waitForMathJax()
       isLoaded.value = true
