@@ -7,62 +7,26 @@
     <title>张祥前统一场论 - UTF Star</title>
     <meta name="description" content="基于Vue3的现代化Web应用，专门用于可视化张祥前统一场论的核心公式" />
     
-    <!-- MathJax 配置 -->
+    <!-- 引入 MathJax -->
     <script>
       window.MathJax = {
         tex: {
           inlineMath: [['\\(', '\\)'], ['$', '$']],
           displayMath: [['$$', '$$'], ['\\[', '\\]']],
-          processEscapes: true,
-          processEnvironments: true,
-          processRefs: true,
           macros: {
-            vec: ['\\overrightarrow{#1}', 1],
-            mat: ['{\\boldsymbol{#1}}', 1]
+            vec: ['\\overrightarrow{#1}', 1]
           },
-          packages: {'[+]': ['ams', 'newcommand', 'configmacros', 'boldsymbol', 'unicode']}
+          packages: {'[+]': ['ams', 'physics']}
         },
         loader: {
-          load: ['[tex]/ams', '[tex]/newcommand', '[tex]/configmacros', '[tex]/boldsymbol', '[tex]/unicode'],
-          source: {
-            '[tex]/ams': '[tex]/ams',
-            '[tex]/newcommand': '[tex]/newcommand', 
-            '[tex]/configmacros': '[tex]/configmacros',
-            '[tex]/boldsymbol': '[tex]/boldsymbol',
-            '[tex]/unicode': '[tex]/unicode'
-          }
+          load: ['[tex]/ams', '[tex]/physics']
         },
         chtml: {
-          fontFamily: 'STIX-Web, STIX Two Math, STIX, STIXGeneral, serif',
-          scale: 1.1,
-          matchFontHeight: true,
-          mtextFontInherit: true
-        },
-        svg: {
-          fontFamily: 'STIX-Web, STIX Two Math, STIX, STIXGeneral, serif',
-          scale: 1.1,
-          matchFontHeight: true,
-          mtextFontInherit: true
-        },
-        options: {
-          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-          ignoreHtmlClass: 'tex2jax_ignore',
-          processHtmlClass: 'tex2jax_process',
-          renderActions: {
-            addMenu: [0, '', '']
-          }
-        },
-        startup: {
-          typeset: true,
-          ready: () => {
-            console.log('MathJax is loaded and ready.');
-            MathJax.startup.defaultReady();
-          }
+          scale: 1.2
         }
       };
     </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
     
     <!-- 字体 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,5 +36,9 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+    
+    <!-- 引入 MathJax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   </body>
 </html>

@@ -113,8 +113,8 @@ export default {
       // 创建一个新的处理后的公式文本
       let result = this.formattedFormula
       
-      // 1. 直接将向量符号转换为粗体，避免乱码
-      result = result.replace(/\\vec\{([^}]+)\}/g, '\\boldsymbol{$1}')
+      // 1. 将向量符号转换为overrightarrow，更美观且避免乱码
+      result = result.replace(/\\vec\{([^}]+)\}/g, '\\overrightarrow{$1}')
       
       // 2. 处理所有数学函数，确保它们后面有空格
       const mathFunctions = [
@@ -209,10 +209,14 @@ export default {
           throw new Error('公式容器未找到')
         }
         
-        // 处理向量符号
+        // 处理向量符号和其他特殊符号
         let processedFormula = this.formula
           // 确保向量符号正确显示
-          .replace(/\\vec\{([^}]+)\}/g, '\\overrightarrow{$1}');
+          .replace(/\\vec\{([^}]+)\}/g, '\\overrightarrow{$1}')
+          // 确保数学函数后有空格
+          .replace(/\\(sin|cos|tan|log|ln|lim|max|min|sup|inf|det|gcd|lcm)\b/g, '\\$1 ')
+          // 确保分数符号后有空格
+          .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '\\frac{$1}{$2} ');
         
         // 直接设置公式内容到DOM元素
         const formulaContent = this.inline ? 
@@ -226,11 +230,25 @@ export default {
           throw new Error('MathJax未加载，请检查index.html配置')
         }
         
-        // 使用MathJax渲染公式
-        await this.renderMath(this.$refs.formulaContainer)
+        // 使用本地MathJax渲染公式
+        if (window.MathJax && window.MathJax.typesetPromise) {
+          try {
+            await window.MathJax.typesetPromise([this.$refs.formulaContainer]);
+            console.log('MathJax渲染成功:', formulaContent);
+          } catch (mjError) {
+            console.error('MathJax渲染错误:', mjError);
+            // 尝试重新渲染
+            window.MathJax.typesetClear([this.$refs.formulaContainer]);
+            await window.MathJax.typesetPromise([this.$refs.formulaContainer]);
+          }
+        } else {
+          console.warn('MathJax未加载，使用降级渲染方法');
+          await this.renderMath(this.$refs.formulaContainer);
+        }
         
         this.isLoading = false
         this.retryCount = 0
+        this.$emit('rendered', { success: true })
         
       } catch (error) {
         console.error('公式渲染错误:', error)
