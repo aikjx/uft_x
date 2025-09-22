@@ -33,8 +33,8 @@
       :class="{ 'tex2jax_process': true }"
       aria-label="数学公式"
     >
-      <span v-if="inline" v-html="sanitizedFormula"></span>
-      <div v-else v-html="sanitizedFormula"></div>
+      <span v-if="inline" ref="formulaElement"></span>
+      <div v-else ref="formulaElement"></div>
     </div>
   </div>
 </template>
@@ -110,32 +110,45 @@ export default {
     sanitizedFormula() {
       if (!this.formattedFormula) return ''
       
-      // 处理可能导致乱码的字符
+      // 创建一个新的处理后的公式文本
       let result = this.formattedFormula
-        // 替换可能导致乱码的特殊字符
-        .replace(/[\u2018\u2019]/g, "'")
-        .replace(/[\u201C\u201D]/g, '"')
-        .replace(/[\u2013\u2014]/g, '-')
-        .replace(/\u2026/g, '...')
-        
-      // 确保向量符号正确显示
-      result = result.replace(/\\vec{([^}]+)}/g, '\\vec{$1} ')
       
-      // 确保数学符号正确显示，添加必要的空格
+      // 1. 直接将向量符号转换为粗体，避免乱码
+      result = result.replace(/\\vec\{([^}]+)\}/g, '\\boldsymbol{$1}')
+      
+      // 2. 处理所有数学函数，确保它们后面有空格
+      const mathFunctions = [
+        'sin', 'cos', 'tan', 'cot', 'sec', 'csc',
+        'arcsin', 'arccos', 'arctan', 'sinh', 'cosh', 'tanh',
+        'log', 'ln', 'exp', 'lim', 'sup', 'inf', 'max', 'min',
+        'det', 'dim', 'mod', 'gcd', 'lcm', 'sum', 'prod',
+        'Delta', 'Gamma', 'Lambda', 'Omega', 'Phi', 'Pi', 'Psi', 'Sigma', 'Theta', 'Xi',
+        'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta', 'iota', 'kappa',
+        'lambda', 'mu', 'nu', 'xi', 'omicron', 'pi', 'rho', 'sigma', 'tau', 'upsilon', 'phi',
+        'chi', 'psi', 'omega'
+      ]
+      
+      // 为所有数学函数添加空格
+      mathFunctions.forEach(func => {
+        const pattern = new RegExp(`\\\\${func}`, 'g')
+        result = result.replace(pattern, `\\${func} `)
+      })
+      
+      // 3. 处理分数，确保分数后有空格
+      result = result.replace(/(\\frac\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g, '$1 ')
+      
+      // 4. 处理运算符，确保它们周围有空格
+      result = result.replace(/([^\\])([+\-*=])/g, '$1 $2 ')
+      
+      // 5. 处理特殊情况
       result = result
-        .replace(/\\infty/g, '\\infty ')
-        .replace(/\\sum/g, '\\sum ')
-        .replace(/\\int/g, '\\int ')
-        .replace(/\\cos/g, '\\cos ')
-        .replace(/\\sin/g, '\\sin ')
-        .replace(/\\omega/g, '\\omega ')
-        .replace(/\\Delta/g, '\\Delta ')
-        .replace(/\\frac{([^}]+)}{([^}]+)}/g, '\\frac{$1}{$2} ')
-        
-      // 处理公式中的特殊符号，确保它们有足够的空格
-      result = result
-        .replace(/([^\\])([\+\-\*\/\=])/g, '$1 $2 ')
-        .replace(/\\\\/g, '\\\\ ')
+        .replace(/\\\\/g, '\\\\ ') // 换行符后添加空格
+        .replace(/\\cdot/g, '\\cdot ') // 点乘符号后添加空格
+        .replace(/\\times/g, '\\times ') // 乘号后添加空格
+        .replace(/\\div/g, '\\div ') // 除号后添加空格
+        .replace(/\\pm/g, '\\pm ') // 加减号后添加空格
+        .replace(/\\mp/g, '\\mp ') // 减加号后添加空格
+        .replace(/\\infty/g, '\\infty ') // 无穷符号后添加空格
         
       return result
     }
@@ -192,9 +205,21 @@ export default {
         
         await this.$nextTick()
         
-        if (!this.$refs.formulaContainer) {
+        if (!this.$refs.formulaContainer || !this.$refs.formulaElement) {
           throw new Error('公式容器未找到')
         }
+        
+        // 处理向量符号
+        let processedFormula = this.formula
+          // 确保向量符号正确显示
+          .replace(/\\vec\{([^}]+)\}/g, '\\overrightarrow{$1}');
+        
+        // 直接设置公式内容到DOM元素
+        const formulaContent = this.inline ? 
+          `\\(${processedFormula}\\)` : 
+          `\\[${processedFormula}\\]`;
+        
+        this.$refs.formulaElement.textContent = formulaContent;
         
         // 检查MathJax是否可用
         if (!this.checkMathJax()) {

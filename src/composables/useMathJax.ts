@@ -112,23 +112,8 @@ export function useMathJax() {
 
       const elements = Array.isArray(element) ? element : [element]
 
-      // 处理每个元素的公式文本，修复可能的编码问题
-      elements.forEach(el => processFormulaText(el))
-
-      // 清理之前的渲染
-      elements.forEach(el => {
-        if (el && window.MathJax.startup && window.MathJax.startup.document) {
-          try {
-            window.MathJax.startup.document.clear()
-          } catch (clearError) {
-            console.warn('清理MathJax缓存失败:', clearError)
-          }
-        }
-      })
-
-      // 渲染新内容
+      // 直接渲染新内容，不做任何预处理
       await window.MathJax.typesetPromise(elements)
-      console.log('MathJax 渲染成功')
 
     } catch (error) {
       console.error('MathJax 渲染失败:', error)

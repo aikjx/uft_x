@@ -16,16 +16,33 @@
           processEscapes: true,
           processEnvironments: true,
           processRefs: true,
-          packages: {'[+]': ['ams', 'newcommand', 'configmacros', 'boldsymbol']}
+          macros: {
+            vec: ['\\overrightarrow{#1}', 1],
+            mat: ['{\\boldsymbol{#1}}', 1]
+          },
+          packages: {'[+]': ['ams', 'newcommand', 'configmacros', 'boldsymbol', 'unicode']}
         },
         loader: {
-          load: ['[tex]/ams', '[tex]/newcommand', '[tex]/configmacros', '[tex]/boldsymbol'],
+          load: ['[tex]/ams', '[tex]/newcommand', '[tex]/configmacros', '[tex]/boldsymbol', '[tex]/unicode'],
           source: {
             '[tex]/ams': '[tex]/ams',
             '[tex]/newcommand': '[tex]/newcommand', 
             '[tex]/configmacros': '[tex]/configmacros',
-            '[tex]/boldsymbol': '[tex]/boldsymbol'
+            '[tex]/boldsymbol': '[tex]/boldsymbol',
+            '[tex]/unicode': '[tex]/unicode'
           }
+        },
+        chtml: {
+          fontFamily: 'STIX-Web, STIX Two Math, STIX, STIXGeneral, serif',
+          scale: 1.1,
+          matchFontHeight: true,
+          mtextFontInherit: true
+        },
+        svg: {
+          fontFamily: 'STIX-Web, STIX Two Math, STIX, STIXGeneral, serif',
+          scale: 1.1,
+          matchFontHeight: true,
+          mtextFontInherit: true
         },
         options: {
           skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
@@ -33,24 +50,6 @@
           processHtmlClass: 'tex2jax_process',
           renderActions: {
             addMenu: [0, '', '']
-          },
-          // 添加字符编码设置
-          menuOptions: {
-            settings: {
-              renderer: 'CHTML',
-              fontCache: true,
-              scale: 1,
-              matchFontHeight: true,
-              mtextInheritFont: false,
-              assistiveMml: true,
-              enableMenu: true,
-              // 设置字符编码
-              chtml: {
-                fontFamily: 'STIX-Web, STIX Two Math, STIX, STIXGeneral, serif',
-                matchFontHeight: true,
-                scale: 1
-              }
-            }
           }
         },
         startup: {
