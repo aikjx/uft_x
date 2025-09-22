@@ -32,8 +32,10 @@
       class="formula-content"
       :class="{ 'tex2jax_process': true }"
       aria-label="数学公式"
-      v-html="sanitizedFormula"
-    ></div>
+    >
+      <span v-if="inline" v-html="sanitizedFormula"></span>
+      <div v-else v-html="sanitizedFormula"></div>
+    </div>
   </div>
 </template>
 
@@ -109,18 +111,33 @@ export default {
       if (!this.formattedFormula) return ''
       
       // 处理可能导致乱码的字符
-      return this.formattedFormula
+      let result = this.formattedFormula
         // 替换可能导致乱码的特殊字符
         .replace(/[\u2018\u2019]/g, "'")
         .replace(/[\u201C\u201D]/g, '"')
         .replace(/[\u2013\u2014]/g, '-')
         .replace(/\u2026/g, '...')
-        // 确保数学符号正确显示
+        
+      // 确保向量符号正确显示
+      result = result.replace(/\\vec{([^}]+)}/g, '\\vec{$1} ')
+      
+      // 确保数学符号正确显示，添加必要的空格
+      result = result
         .replace(/\\infty/g, '\\infty ')
         .replace(/\\sum/g, '\\sum ')
         .replace(/\\int/g, '\\int ')
-        // 添加空格以防止符号连接导致的乱码
+        .replace(/\\cos/g, '\\cos ')
+        .replace(/\\sin/g, '\\sin ')
+        .replace(/\\omega/g, '\\omega ')
+        .replace(/\\Delta/g, '\\Delta ')
+        .replace(/\\frac{([^}]+)}{([^}]+)}/g, '\\frac{$1}{$2} ')
+        
+      // 处理公式中的特殊符号，确保它们有足够的空格
+      result = result
         .replace(/([^\\])([\+\-\*\/\=])/g, '$1 $2 ')
+        .replace(/\\\\/g, '\\\\ ')
+        
+      return result
     }
   },
   

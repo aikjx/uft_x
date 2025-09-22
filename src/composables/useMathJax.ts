@@ -68,16 +68,31 @@ export function useMathJax() {
     formulaElements.forEach(el => {
       if (el.textContent) {
         // 确保公式文本使用正确的编码
-        const text = el.textContent
+        let text = el.textContent
           // 替换可能导致乱码的特殊字符
           .replace(/[\u2018\u2019]/g, "'")
           .replace(/[\u201C\u201D]/g, '"')
           .replace(/[\u2013\u2014]/g, '-')
           .replace(/\u2026/g, '...')
-          // 确保数学符号正确显示
+        
+        // 确保向量符号正确显示
+        text = text.replace(/\\vec{([^}]+)}/g, '\\vec{$1} ')
+        
+        // 确保数学符号正确显示，添加必要的空格
+        text = text
           .replace(/\\infty/g, '\\infty ')
           .replace(/\\sum/g, '\\sum ')
           .replace(/\\int/g, '\\int ')
+          .replace(/\\cos/g, '\\cos ')
+          .replace(/\\sin/g, '\\sin ')
+          .replace(/\\omega/g, '\\omega ')
+          .replace(/\\Delta/g, '\\Delta ')
+          .replace(/\\frac{([^}]+)}{([^}]+)}/g, '\\frac{$1}{$2} ')
+        
+        // 处理公式中的特殊符号，确保它们有足够的空格
+        text = text
+          .replace(/([^\\])([\+\-\*\/\=])/g, '$1 $2 ')
+          .replace(/\\\\/g, '\\\\ ')
           
         el.textContent = text
       }
