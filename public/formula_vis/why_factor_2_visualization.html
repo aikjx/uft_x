@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>为什么几何因子是2？- 终极3D可视化</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at center, #001122, #000000);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .ui-panel {
+            position: absolute;
+            background: rgba(0, 10, 30, 0.95);
+            border: 2px solid;
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+        
+        #step-panel {
+            top: 20px;
+            left: 20px;
+            width: 380px;
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+        
+        #calculation-panel {
+            top: 20px;
+            right: 20px;
+            width: 350px;
+            border-color: #ff6b35;
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+        }
+        
+        #controls-panel {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            border-color: #ff00ff;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .step-title {
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 10px #00ffff;
+        }
+        
+        .step-content {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .highlight {
+            color: #ffff00;
+            font-weight: bold;
+            text-shadow: 0 0 8px #ffff00;
+        }
+        
+        .math-formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            border-left: 4px solid #00ff00;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #ffff00);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 10px;
+        }
+        
+        .control-group label {
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        input[type="range"] {
+            width: 100px;
+            margin: 5px 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            border: none;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 0 5px;
+            font-size: 12px;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+        }
+        
+        button.active {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+        }
+        
+        .fountain-mode {
+            border-color: #00ffff !important;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5) !important;
+        }
+        
+        .hemisphere-mode {
+            border-color: #ffff00 !important;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.5) !important;
+        }
+        
+        .projection-mode {
+            border-color: #ff00ff !important;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.5) !important;
+        }
+        
+        .factor-mode {
+            border-color: #00ff00 !important;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5) !important;
+        }
+        
+        #big-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00ff00;
+            text-align: center;
+            text-shadow: 0 0 20px #00ff00;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        
+        .error-highlight {
+            color: #ff4444;
+            background: rgba(255, 68, 68, 0.2);
+            padding: 5px;
+            border-radius: 4px;
+            text-shadow: 0 0 10px #ff4444;
+        }
+        
+        .correct-highlight {
+            color: #44ff44;
+            background: rgba(68, 255, 68, 0.2);
+            padding: 5px;
+            border-radius: 4px;
+            text-shadow: 0 0 10px #44ff44;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: #00ffff;
+            z-index: 200;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div class="loading" id="loading">正在构建3D几何证明...</div>
+    
+    <div id="container">
+        <!-- 步骤解释面板 -->
+        <div id="step-panel" class="ui-panel fountain-mode">
+            <div class="step-title">🎯 喷泉比喻理解</div>
+            <div class="step-content">
+                <div class="highlight">当前阶段：</div>
+                <div id="current-step">步骤1：空间发散可视化</div>
+                
+                <div class="highlight">核心概念：</div>
+                <div id="concept-text">
+                    M₁像喷泉一样向四周喷射"空间作用"<br>
+                    只有射向M₂方向的"水花"才有效
+                </div>
+                
+                <div class="highlight">观察要点：</div>
+                <div id="observation-text">
+                    • 蓝色粒子：全方向发散<br>
+                    • 红色区域：有效作用区<br>
+                    • 注意角度θ的变化效应
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="step-progress"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 计算面板 -->
+        <div id="calculation-panel" class="ui-panel fountain-mode">
+            <div class="step-title">📊 实时计算</div>
+            
+            <div class="math-formula">
+                <div>球面总面积：<span class="highlight">4π</span></div>
+                <div>半球面积：<span class="highlight" id="hemisphere-area">2π</span></div>
+                <div>有效比例：<span id="ratio-value">1/2</span></div>
+            </div>
+            
+            <div class="math-formula">
+                <div>sin²θ 积分：<span id="sin2-integral">π/2</span></div>
+                <div>参考积分：<span id="reference-integral">π</span></div>
+                <div>效果比例：<span id="effect-ratio">1/2</span></div>
+            </div>
+            
+            <div id="big-number">2</div>
+            
+            <div class="math-formula">
+                <div class="correct-highlight">
+                    几何因子 = 1 ÷ 效果比例<br>
+                    = 1 ÷ (1/2) = <span class="highlight">2</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; font-size: 12px; color: #aaaaaa;">
+                实时数值：θ=<span id="theta-display">0°</span>,
+                sin²θ=<span id="sin2-display">0.000</span>
+            </div>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div id="controls-panel" class="ui-panel fountain-mode">
+            <div class="control-group">
+                <label>演示步骤</label>
+                <button onclick="setStep(1)" id="step1-btn" class="active">1.喷泉发散</button>
+                <button onclick="setStep(2)" id="step2-btn">2.半球筛选</button>
+                <button onclick="setStep(3)" id="step3-btn">3.投影权重</button>
+                <button onclick="setStep(4)" id="step4-btn">4.因子推导</button>
+            </div>
+            
+            <div class="control-group">
+                <label>动画控制</label>
+                <button onclick="toggleAnimation()" id="anim-btn">暂停</button>
+                <button onclick="resetDemo()">重置</button>
+                <input type="range" id="speed-slider" min="0.1" max="3" step="0.1" value="1">
+                <label>速度</label>
+            </div>
+            
+            <div class="control-group">
+                <label>粒子数量</label>
+                <input type="range" id="particle-count" min="200" max="2000" step="100" value="800">
+                <button onclick="updateParticles()">更新</button>
+            </div>
+            
+            <div class="control-group">
+                <label>视角控制</label>
+                <button onclick="resetCamera()">重置视角</button>
+                <button onclick="toggleProjection()">切换投影</button>
+            </div>
+            
+            <div class="control-group">
+                <label>错误对比</label>
+                <button onclick="showWrongMethod()" id="wrong-btn">错误方法</button>
+                <button onclick="showCorrectMethod()" id="correct-btn" class="active">正确方法</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let scene, camera, renderer;
+        let fountain, hemisphere, projectionPlane, factorVisualization;
+        let particles = [];
+        let animationId;
+        let isAnimating = true;
+        let currentStep = 1;
+        let time = 0;
+        let animationSpeed = 1;
+        let particleCount = 800;
+        
+        // 物理对象
+        let massM1, massM2;
+        let connectionLine;
+        let coordinateAxes;
+        
+        // 演示数据
+        let stepData = {
+            progress: 0,
+            hemisphereRatio: 0.5,
+            sin2Integral: Math.PI / 2,
+            effectRatio: 0.5,
+            geometricFactor: 2
+        };
+        
+        // 初始化
+        function init() {
+            setupScene();
+            createGeometry();
+            createParticleSystem();
+            setupLighting();
+            setupEventListeners();
+            
+            document.getElementById('loading').style.display = 'none';
+            animate();
+        }
+        
+        function setupScene() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x001122, 30, 150);
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(40, 25, 40);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true, 
+                alpha: true,
+                powerPreference: "high-performance" 
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setClearColor(0x001122, 0.9);
+            
+            document.getElementById('container').appendChild(renderer.domElement);
+        }
+        
+        function createGeometry() {
+            // 质量体 M1 (喷泉源)
+            const m1Geometry = new THREE.SphereGeometry(3, 32, 32);
+            const m1Material = new THREE.MeshPhongMaterial({
+                color: 0xff6b35,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.9
+            });
+            massM1 = new THREE.Mesh(m1Geometry, m1Material);
+            massM1.position.set(-20, 0, 0);
+            massM1.castShadow = true;
+            scene.add(massM1);
+            
+            // 质量体 M2 (目标)
+            const m2Geometry = new THREE.SphereGeometry(2, 32, 32);
+            const m2Material = new THREE.MeshPhongMaterial({
+                color: 0x00ffff,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.9
+            });
+            massM2 = new THREE.Mesh(m2Geometry, m2Material);
+            massM2.position.set(20, 0, 0);
+            massM2.castShadow = true;
+            scene.add(massM2);
+            
+            // 连接线
+            const linePoints = [massM1.position.clone(), massM2.position.clone()];
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+            const lineMaterial = new THREE.LineBasicMaterial({ 
+                color: 0xffffff, 
+                transparent: true, 
+                opacity: 0.6 
+            });
+            connectionLine = new THREE.Line(lineGeometry, lineMaterial);
+            scene.add(connectionLine);
+            
+            // 球面网格 (4π 总空间)
+            const sphereGeometry = new THREE.SphereGeometry(25, 32, 16);
+            const sphereMaterial = new THREE.MeshBasicMaterial({
+                color: 0x444444,
+                transparent: true,
+                opacity: 0.15,
+                wireframe: true
+            });
+            const totalSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            totalSphere.position.copy(massM1.position);
+            scene.add(totalSphere);
+            
+            // 半球面 (2π 有效空间)
+            const hemisphereGeometry = new THREE.SphereGeometry(25, 32, 16, 0, Math.PI);
+            const hemisphereMaterial = new THREE.MeshPhongMaterial({
+                color: 0xffff00,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            hemisphere = new THREE.Mesh(hemisphereGeometry, hemisphereMaterial);
+            hemisphere.position.copy(massM1.position);
+            hemisphere.rotation.y = 0; // 朝向M2
+            hemisphere.visible = false;
+            scene.add(hemisphere);
+            
+            // 投影平面
+            const planeGeometry = new THREE.PlaneGeometry(40, 40, 20, 20);
+            const planeMaterial = new THREE.MeshPhongMaterial({
+                color: 0xff00ff,
+                transparent: true,
+                opacity: 0.2,
+                side: THREE.DoubleSide,
+                wireframe: true
+            });
+            projectionPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+            projectionPlane.rotation.y = Math.PI / 2;
+            projectionPlane.position.set(0, 0, 0);
+            projectionPlane.visible = false;
+            scene.add(projectionPlane);
+            
+            // 坐标轴
+            coordinateAxes = new THREE.Group();
+            
+            // X轴 (连接方向)
+            const xAxis = new THREE.ArrowHelper(
+                new THREE.Vector3(1, 0, 0), 
+                new THREE.Vector3(-30, 0, 0), 
+                60, 
+                0xff0000, 
+                8, 3
+            );
+            coordinateAxes.add(xAxis);
+            
+            // Y轴
+            const yAxis = new THREE.ArrowHelper(
+                new THREE.Vector3(0, 1, 0), 
+                new THREE.Vector3(0, -30, 0), 
+                60, 
+                0x00ff00, 
+                8, 3
+            );
+            coordinateAxes.add(yAxis);
+            
+            // Z轴
+            const zAxis = new THREE.ArrowHelper(
+                new THREE.Vector3(0, 0, 1), 
+                new THREE.Vector3(0, 0, -30), 
+                60, 
+                0x0000ff, 
+                8, 3
+            );
+            coordinateAxes.add(zAxis);
+            
+            scene.add(coordinateAxes);
+        }
+        
+        function createParticleSystem() {
+            // 清除旧粒子
+            particles.forEach(particle => scene.remove(particle));
+            particles = [];
+            
+            const particleGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+            
+            for (let i = 0; i < particleCount; i++) {
+                // 球面均匀分布
+                const u = Math.random();
+                const v = Math.random();
+                const phi = 2 * Math.PI * u; // 方位角
+                const theta = Math.acos(2 * v - 1); // 极角
+                
+                // 计算颜色基于 sin²θ
+                const sinTheta = Math.sin(theta);
+                const sin2Theta = sinTheta * sinTheta;
+                
+                const particleMaterial = new THREE.MeshPhongMaterial({
+                    color: new THREE.Color().setHSL(
+                        0.6 - sin2Theta * 0.4, // 色调：青色到紫色
+                        0.8 + sin2Theta * 0.2,  // 饱和度
+                        0.4 + sin2Theta * 0.4   // 亮度
+                    ),
+                    transparent: true,
+                    opacity: 0.7
+                });
+                
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+                
+                // 初始位置在 M1 附近
+                particle.position.copy(massM1.position);
+                particle.position.add(new THREE.Vector3(
+                    Math.random() * 2 - 1,
+                    Math.random() * 2 - 1,
+                    Math.random() * 2 - 1
+                ));
+                
+                // 存储发射方向和物理参数
+                particle.userData = {
+                    direction: new THREE.Vector3(
+                        Math.sin(theta) * Math.cos(phi),
+                        Math.sin(theta) * Math.sin(phi),
+                        Math.cos(theta)
+                    ),
+                    theta: theta,
+                    phi: phi,
+                    sin2Theta: sin2Theta,
+                    speed: 0.3 + Math.random() * 0.2,
+                    startTime: Math.random() * Math.PI * 2,
+                    originalOpacity: 0.7
+                };
+                
+                particles.push(particle);
+                scene.add(particle);
+            }
+        }
+        
+        function setupLighting() {
+            // 环境光
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+            scene.add(ambientLight);
+            
+            // 主光源
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(50, 50, 50);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // M1 的光源
+            const m1Light = new THREE.PointLight(0xff6b35, 2, 60);
+            m1Light.position.copy(massM1.position);
+            scene.add(m1Light);
+            
+            // M2 的光源  
+            const m2Light = new THREE.PointLight(0x00ffff, 1, 40);
+            m2Light.position.copy(massM2.position);
+            scene.add(m2Light);
+        }
+        
+        function setupEventListeners() {
+            window.addEventListener('resize', onWindowResize, false);
+            
+            // 滑块事件
+            document.getElementById('speed-slider').addEventListener('input', (e) => {
+                animationSpeed = parseFloat(e.target.value);
+            });
+            
+            document.getElementById('particle-count').addEventListener('input', (e) => {
+                particleCount = parseInt(e.target.value);
+            });
+            
+            // 鼠标控制
+            let mouseDown = false;
+            let mouseX = 0, mouseY = 0;
+            
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                mouseDown = true;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                mouseDown = false;
+            });
+            
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (!mouseDown) return;
+                
+                const deltaX = e.clientX - mouseX;
+                const deltaY = e.clientY - mouseY;
+                
+                const spherical = new THREE.Spherical();
+                spherical.setFromVector3(camera.position);
+                spherical.theta -= deltaX * 0.01;
+                spherical.phi += deltaY * 0.01;
+                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                
+                camera.position.setFromSpherical(spherical);
+                camera.lookAt(0, 0, 0);
+                
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            // 滚轮缩放
+            renderer.domElement.addEventListener('wheel', (e) => {
+                const scaleFactor = e.deltaY > 0 ? 1.1 : 0.9;
+                camera.position.multiplyScalar(scaleFactor);
+                camera.position.clampLength(15, 120);
+            });
+        }
+        
+        function animate() {
+            if (isAnimating) {
+                time += 0.016 * animationSpeed;
+                updateParticleAnimation();
+                updateStepAnimation();
+                updateUI();
+                updateMassAnimation();
+            }
+            
+            renderer.render(scene, camera);
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function updateParticleAnimation() {
+            const radius = 25;
+            
+            particles.forEach((particle, index) => {
+                const userData = particle.userData;
+                const t = time + userData.startTime;
+                
+                // 根据当前步骤调整粒子行为
+                switch(currentStep) {
+                    case 1: // 喷泉发散
+                        updateFountainMode(particle, t, radius);
+                        break;
+                    case 2: // 半球筛选
+                        updateHemisphereMode(particle, t, radius);
+                        break;
+                    case 3: // 投影权重
+                        updateProjectionMode(particle, t, radius);
+                        break;
+                    case 4: // 因子推导
+                        updateFactorMode(particle, t, radius);
+                        break;
+                }
+            });
+        }
+        
+        function updateFountainMode(particle, t, radius) {
+            const userData = particle.userData;
+            const cycleTime = t * userData.speed;
+            const distance = (Math.sin(cycleTime) * 0.5 + 0.5) * radius;
+            
+            // 从M1向外发散
+            const pos = massM1.position.clone();
+            pos.add(userData.direction.clone().multiplyScalar(distance));
+            particle.position.copy(pos);
+            
+            // 透明度基于距离
+            const alpha = userData.originalOpacity * (1 - distance / radius);
+            particle.material.opacity = alpha;
+            
+            // 大小变化
+            const scale = 1 + Math.sin(cycleTime * 2) * 0.3;
+            particle.scale.setScalar(scale);
+        }
+        
+        function updateHemisphereMode(particle, t, radius) {
+            const userData = particle.userData;
+            
+            // 检查是否在朝向M2的半球内
+            const dirToM2 = massM2.position.clone().sub(massM1.position).normalize();
+            const isTowardM2 = userData.direction.dot(dirToM2) > 0;
+            
+            if (isTowardM2) {
+                // 有效粒子：正常显示
+                updateFountainMode(particle, t, radius);
+                particle.material.opacity *= 1.5; // 增强显示
+                particle.material.color.setHex(0x00ff00); // 绿色表示有效
+            } else {
+                // 无效粒子：淡化
+                updateFountainMode(particle, t, radius);
+                particle.material.opacity *= 0.2; // 大幅淡化
+                particle.material.color.setHex(0x666666); // 灰色表示无效
+            }
+        }
+        
+        function updateProjectionMode(particle, t, radius) {
+            const userData = particle.userData;
+            const dirToM2 = massM2.position.clone().sub(massM1.position).normalize();
+            const isTowardM2 = userData.direction.dot(dirToM2) > 0;
+            
+            if (isTowardM2) {
+                updateFountainMode(particle, t, radius);
+                
+                // 基于 sin²θ 调整显示
+                const intensity = userData.sin2Theta;
+                particle.material.opacity = userData.originalOpacity * intensity * 2;
+                
+                // 颜色基于 sin²θ：红色(低) -> 黄色(中) -> 绿色(高)
+                particle.material.color.setHSL(
+                    intensity * 0.33, // 0=红色, 0.33=绿色
+                    1.0,
+                    0.5 + intensity * 0.3
+                );
+                
+                // 大小基于权重
+                particle.scale.setScalar(0.5 + intensity * 1.5);
+            } else {
+                particle.material.opacity = 0.05;
+            }
+        }
+        
+        function updateFactorMode(particle, t, radius) {
+            updateProjectionMode(particle, t, radius);
+            
+            // 添加几何因子的可视化效果
+            const userData = particle.userData;
+            const dirToM2 = massM2.position.clone().sub(massM1.position).normalize();
+            const isTowardM2 = userData.direction.dot(dirToM2) > 0;
+            
+            if (isTowardM2 && userData.sin2Theta > 0.1) {
+                // 高权重粒子显示"×2"效果
+                const pulseFactor = 1 + Math.sin(t * 4) * 0.5;
+                particle.scale.multiplyScalar(pulseFactor);
+                
+                // 添加辉光效果
+                if (userData.sin2Theta > 0.7) {
+                    particle.material.emissive.setHex(0x004400);
+                }
+            }
+        }
+        
+        function updateStepAnimation() {
+            // 更新步骤进度
+            stepData.progress = (Math.sin(time * 0.5) + 1) * 0.5;
+            
+            // 根据步骤显示/隐藏几何体
+            switch(currentStep) {
+                case 1:
+                    hemisphere.visible = false;
+                    projectionPlane.visible = false;
+                    break;
+                case 2:
+                    hemisphere.visible = true;
+                    projectionPlane.visible = false;
+                    hemisphere.material.opacity = 0.3 + stepData.progress * 0.3;
+                    break;
+                case 3:
+                    hemisphere.visible = true;
+                    projectionPlane.visible = true;
+                    projectionPlane.material.opacity = 0.2 + stepData.progress * 0.3;
+                    break;
+                case 4:
+                    hemisphere.visible = true;
+                    projectionPlane.visible = true;
+                    
+                    // 几何因子可视化：显示倍增效应
+                    const factorGlow = 0.5 + stepData.progress * 0.5;
+                    hemisphere.material.emissive.setHex(0x002200);
+                    projectionPlane.material.emissive.setHex(0x220022);
+                    break;
+            }
+        }
+        
+        function updateUI() {
+            // 更新进度条
+            document.getElementById('step-progress').style.width = (stepData.progress * 100) + '%';
+            
+            // 更新实时数值
+            const currentTheta = stepData.progress * Math.PI;
+            const sin2Value = Math.sin(currentTheta) * Math.sin(currentTheta);
+            
+            document.getElementById('theta-display').textContent = (currentTheta * 180 / Math.PI).toFixed(1) + '°';
+            document.getElementById('sin2-display').textContent = sin2Value.toFixed(3);
+            
+            // 更新计算面板数值
+            document.getElementById('hemisphere-area').textContent = '2π';
+            document.getElementById('ratio-value').textContent = '1/2';
+            document.getElementById('sin2-integral').textContent = 'π/2';
+            document.getElementById('reference-integral').textContent = 'π';
+            document.getElementById('effect-ratio').textContent = '1/2';
+        }
+        
+        function updateMassAnimation() {
+            // 质量体轻微动画
+            massM1.position.y = Math.sin(time * 1.5) * 0.8;
+            massM1.rotation.y += 0.01 * animationSpeed;
+            
+            massM2.position.y = Math.cos(time * 1.2) * 0.6;
+            massM2.rotation.x += 0.012 * animationSpeed;
+            
+            // 连接线跟随
+            const linePoints = [massM1.position.clone(), massM2.position.clone()];
+            connectionLine.geometry.setFromPoints(linePoints);
+        }
+        
+        // 控制函数
+        function setStep(step) {
+            currentStep = step;
+            
+            // 更新按钮状态
+            document.querySelectorAll('#controls-panel button[id*="step"]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`step${step}-btn`).classList.add('active');
+            
+            // 更新面板样式和内容
+            const panels = document.querySelectorAll('.ui-panel');
+            panels.forEach(panel => {
+                panel.className = 'ui-panel'; // 重置类名
+            });
+            
+            switch(step) {
+                case 1:
+                    panels.forEach(panel => panel.classList.add('fountain-mode'));
+                    updateStepContent(
+                        '🎯 喷泉发散模式',
+                        '步骤1：观察空间向四周发散',
+                        'M₁像喷泉一样向全空间4π方向发射"作用"<br>每个蓝色粒子代表一个发散方向',
+                        '• 蓝色粒子：全方向发散<br>• 发散速度：光速c<br>• 注意球对称分布'
+                    );
+                    break;
+                    
+                case 2:
+                    panels.forEach(panel => panel.classList.add('hemisphere-mode'));
+                    updateStepContent(
+                        '🌗 半球筛选模式',  
+                        '步骤2：筛选朝向M₂的半球',
+                        '只有朝向M₂方向的"作用"才有效<br>有效空间：2π（半球）vs 总空间：4π',
+                        '• 绿色粒子：有效作用<br>• 灰色粒子：无效作用<br>• 黄色半球：有效区域'
+                    );
+                    break;
+                    
+                case 3:
+                    panels.forEach(panel => panel.classList.add('projection-mode'));
+                    updateStepContent(
+                        '📐 投影权重模式',
+                        '步骤3：计算sin²θ权重效应', 
+                        '不同角度θ的作用效果不同<br>θ=90°效果最强，θ=0°,180°效果为零',
+                        '• 颜色深浅：sin²θ大小<br>• 粒子大小：权重效应<br>• 紫色面：投影平面'
+                    );
+                    break;
+                    
+                case 4:
+                    panels.forEach(panel => panel.classList.add('factor-mode'));
+                    updateStepContent(
+                        '✨ 几何因子推导',
+                        '步骤4：为什么因子是2',
+                        '有效作用比例=1/2，需要放大2倍<br>几何因子 = 1 ÷ 有效比例 = 2',
+                        '• 高亮粒子：×2效果<br>• 辉光效应：倍增可视化<br>• 最终答案：2'
+                    );
+                    break;
+            }
+        }
+        
+        function updateStepContent(title, step, concept, observation) {
+            document.querySelector('.step-title').textContent = title;
+            document.getElementById('current-step').textContent = step;
+            document.getElementById('concept-text').innerHTML = concept;
+            document.getElementById('observation-text').innerHTML = observation;
+        }
+        
+        function toggleAnimation() {
+            isAnimating = !isAnimating;
+            document.getElementById('anim-btn').textContent = isAnimating ? '暂停' : '继续';
+        }
+        
+        function resetDemo() {
+            time = 0;
+            stepData.progress = 0;
+            setStep(1);
+        }
+        
+        function updateParticles() {
+            createParticleSystem();
+        }
+        
+        function resetCamera() {
+            camera.position.set(40, 25, 40);
+            camera.lookAt(0, 0, 0);
+        }
+        
+        function toggleProjection() {
+            projectionPlane.visible = !projectionPlane.visible;
+        }
+        
+        function showWrongMethod() {
+            // 显示错误的cosθ方法
+            document.getElementById('wrong-btn').classList.add('active');
+            document.getElementById('correct-btn').classList.remove('active');
+            
+            // 更新计算显示
+            document.getElementById('sin2-integral').innerHTML = '<span class="error-highlight">0</span>';
+            document.getElementById('effect-ratio').innerHTML = '<span class="error-highlight">0</span>';
+            document.getElementById('big-number').innerHTML = '<span class="error-highlight">∞</span>';
+            
+            // 修改粒子显示逻辑（临时演示错误方法）
+            particles.forEach(particle => {
+                const userData = particle.userData;
+                const cosTheta = Math.cos(userData.theta);
+                
+                if (Math.abs(cosTheta) > 0.1) {
+                    particle.material.opacity = Math.abs(cosTheta) * 0.8;
+                    particle.material.color.setHex(0xff4444); // 红色表示错误
+                } else {
+                    particle.material.opacity = 0.05;
+                }
+            });
+        }
+        
+        function showCorrectMethod() {
+            // 显示正确的sin²θ方法
+            document.getElementById('correct-btn').classList.add('active');
+            document.getElementById('wrong-btn').classList.remove('active');
+            
+            // 恢复正确计算显示
+            document.getElementById('sin2-integral').innerHTML = 'π/2';
+            document.getElementById('effect-ratio').innerHTML = '1/2';
+            document.getElementById('big-number').innerHTML = '2';
+            
+            // 恢复正确的粒子显示
+            // 这会在下一次animate循环中自动更正
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // 启动应用
+        init();
+        
+        // 自动演示循环（可选）
+        setInterval(() => {
+            if (isAnimating) {
+                const nextStep = (currentStep % 4) + 1;
+                // setStep(nextStep); // 取消注释可启用自动循环
+            }
+        }, 10000); // 每10秒切换一步
+    </script>
+</body>
+</html>

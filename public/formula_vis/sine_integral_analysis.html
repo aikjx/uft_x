@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正弦积分推导几何因子2的深度分析</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0c0c2e, #1a0033, #0c0c2e);
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .panel {
+            position: absolute;
+            background: rgba(10, 20, 40, 0.95);
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+        
+        #analysis-panel {
+            top: 20px;
+            left: 20px;
+            width: 420px;
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+        
+        #comparison-panel {
+            top: 20px;
+            right: 20px;
+            width: 380px;
+            border-color: #ff6b35;
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+        }
+        
+        #visualization-controls {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            border-color: #ff00ff;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .analysis-title { color: #00ffff; }
+        .comparison-title { color: #ff6b35; }
+        .controls-title { color: #ff00ff; }
+        
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .physics-section { border-left-color: #00ff00; }
+        .math-section { border-left-color: #ffff00; }
+        .insight-section { border-left-color: #ff00ff; }
+        .comparison-section { border-left-color: #ff6b35; }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        
+        .math-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .highlight {
+            color: #ffff00;
+            font-weight: bold;
+            text-shadow: 0 0 8px #ffff00;
+        }
+        
+        .success { color: #00ff00; text-shadow: 0 0 8px #00ff00; }
+        .warning { color: #ff6b35; text-shadow: 0 0 8px #ff6b35; }
+        .critical { color: #ff0000; text-shadow: 0 0 8px #ff0000; }
+        
+        button {
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            border: none;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin: 0 5px;
+            font-size: 12px;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.6);
+        }
+        
+        button.active {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+        }
+        
+        input[type="range"] {
+            width: 100px;
+            margin: 0 8px;
+        }
+        
+        .integral-display {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            border: 2px solid #00ff00;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            margin: 0 2px;
+            border-radius: 4px;
+            font-size: 11px;
+            transition: all 0.3s;
+        }
+        
+        .step.active {
+            background: rgba(0, 255, 0, 0.3);
+            border: 1px solid #00ff00;
+        }
+        
+        .step.inactive {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-container"></div>
+        
+        <!-- 分析面板 -->
+        <div id="analysis-panel" class="panel">
+            <div class="panel-title analysis-title">📊 正弦积分推导分析</div>
+            
+            <div class="section physics-section">
+                <div class="section-title">🔬 物理基础</div>
+                <div style="font-size: 13px; line-height: 1.5;">
+                    <div>• <span class="highlight">空间发散</span>：光速c向各方向</div>
+                    <div>• <span class="highlight">接触机制</span>：空间条数 ∝ c</div>
+                    <div>• <span class="highlight">角度权重</span>：sinθ 投影效应</div>
+                    <div>• <span class="highlight">有效范围</span>：朝向目标的半球</div>
+                </div>
+            </div>
+            
+            <div class="section math-section">
+                <div class="section-title">📐 关键积分</div>
+                <div class="math-formula">
+                    全空间积分:<br>
+                    <span class="highlight">∫₀^π sinθ dθ = 2</span>
+                </div>
+                <div class="math-formula">
+                    半球积分:<br>
+                    <span class="success">∫₀^(π/2) sinθ dθ = 1</span>
+                </div>
+                <div class="integral-display">
+                    几何因子 = <span class="highlight">2/1 = 2</span>
+                </div>
+            </div>
+            
+            <div class="section insight-section">
+                <div class="section-title">💡 核心洞察</div>
+                <div style="font-size: 12px; line-height: 1.4;">
+                    <div class="success">✓ 简洁性：直接从sinθ积分得出</div>
+                    <div class="success">✓ 物理性：基于光速接触机制</div>
+                    <div class="success">✓ 对称性：体现3D→2D转换</div>
+                    <div class="warning">⚠ 需要明确sinθ的物理来源</div>
+                </div>
+            </div>
+            
+            <div class="step-indicator">
+                <div class="step active" id="step1">物理建模</div>
+                <div class="step inactive" id="step2">角度分析</div>
+                <div class="step inactive" id="step3">积分计算</div>
+                <div class="step inactive" id="step4">因子推导</div>
+            </div>
+        </div>
+        
+        <!-- 对比面板 -->
+        <div id="comparison-panel" class="panel">
+            <div class="panel-title comparison-title">⚖️ 方法对比评估</div>
+            
+            <div class="section comparison-section">
+                <div class="section-title">🏆 优势分析</div>
+                <div style="font-size: 12px; line-height: 1.5;">
+                    <div class="success"><strong>数学简洁性 ★★★★★</strong></div>
+                    <div>• 只需要基本的正弦积分</div>
+                    <div>• 避免复杂的立体角计算</div>
+                    <div>• 结果直观：2/1=2</div>
+                    
+                    <div class="success"><strong>物理直观性 ★★★★☆</strong></div>
+                    <div>• 空间接触速度概念清晰</div>
+                    <div>• 光速c的物理意义明确</div>
+                    <div>• sinθ权重容易理解</div>
+                </div>
+            </div>
+            
+            <div class="section comparison-section">
+                <div class="section-title">⚠️ 潜在问题</div>
+                <div style="font-size: 12px; line-height: 1.5;">
+                    <div class="warning"><strong>理论完整性</strong></div>
+                    <div>• 为什么权重是sinθ而非cosθ？</div>
+                    <div>• 全空间vs半球的划分依据？</div>
+                    
+                    <div class="warning"><strong>与其他方法的关系</strong></div>
+                    <div>• 如何与sin²θ方法统一？</div>
+                    <div>• 标准化常数8/π在哪里？</div>
+                </div>
+            </div>
+            
+            <div class="section comparison-section">
+                <div class="section-title">🔗 方法统一</div>
+                <div style="font-size: 12px;">
+                    <div class="math-formula">
+                        sin²θ方法: ∫₀^π sin²θ dθ = π/2<br>
+                        标准化后: (π/2)×(8/π)÷2 = 2
+                    </div>
+                    <div class="math-formula">
+                        sinθ方法: ∫₀^π sinθ dθ = 2<br>
+                        直接得到: 2÷1 = 2
+                    </div>
+                    <div class="highlight">两种方法殊途同归！</div>
+                </div>
+            </div>
+            
+            <div id="method-rating">
+                <div style="text-align: center; margin-top: 15px;">
+                    <div class="success" style="font-size: 16px;">综合评分: ★★★★☆</div>
+                    <div style="font-size: 12px; color: #aaa;">
+                        简洁而有效的补充方法
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div id="visualization-controls" class="panel">
+            <div class="panel-title controls-title">🎛️ 可视化控制</div>
+            
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 12px; margin-bottom: 5px;">积分范围</div>
+                    <button onclick="setIntegralRange('full')" id="full-btn" class="active">0→π</button>
+                    <button onclick="setIntegralRange('half')" id="half-btn">0→π/2</button>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 12px; margin-bottom: 5px;">函数显示</div>
+                    <button onclick="setFunction('sin')" id="sin-btn" class="active">sinθ</button>
+                    <button onclick="setFunction('sin2')" id="sin2-btn">sin²θ</button>
+                    <button onclick="setFunction('cos')" id="cos-btn">cosθ</button>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 12px; margin-bottom: 5px;">动画速度</div>
+                    <input type="range" id="speed-slider" min="0.5" max="3" step="0.1" value="1.5">
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 12px; margin-bottom: 5px;">显示模式</div>
+                    <button onclick="toggleMode()" id="mode-btn">3D模式</button>
+                    <button onclick="resetView()">重置</button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; text-align: center; font-size: 12px;">
+                当前积分值: <span id="current-integral" class="highlight">2.000</span> | 
+                几何因子: <span id="geometric-factor" class="success">2.000</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer;
+        let integralCurve, projectionPlane, coordinateSystem;
+        let animationId, isAnimating = true;
+        let time = 0, animationSpeed = 1.5;
+        let currentFunction = 'sin', currentRange = 'full';
+        let integralPoints = [], currentStep = 1;
+        
+        function init() {
+            setupScene();
+            createGeometry();
+            createIntegralVisualization();
+            setupLighting();
+            setupControls();
+            animate();
+        }
+        
+        function setupScene() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0c0c2e, 20, 100);
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(25, 15, 25);
+            camera.lookAt(0, 0, 0);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.setClearColor(0x0c0c2e, 0.8);
+            
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+        }
+        
+        function createGeometry() {
+            // 坐标系
+            coordinateSystem = new THREE.Group();
+            
+            // θ轴 (0到π)
+            const thetaAxis = new THREE.ArrowHelper(
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(-15, 0, 0),
+                30, 0xff0000, 3, 1.5
+            );
+            coordinateSystem.add(thetaAxis);
+            
+            // 函数值轴
+            const valueAxis = new THREE.ArrowHelper(
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(-15, 0, 0),
+                20, 0x00ff00, 3, 1.5
+            );
+            coordinateSystem.add(valueAxis);
+            
+            // Z轴 (3D扩展)
+            const zAxis = new THREE.ArrowHelper(
+                new THREE.Vector3(0, 0, 1),
+                new THREE.Vector3(-15, 0, -15),
+                30, 0x0000ff, 3, 1.5
+            );
+            coordinateSystem.add(zAxis);
+            
+            scene.add(coordinateSystem);
+            
+            // 添加标签
+            addAxisLabels();
+            
+            // 积分区域
+            createIntegralArea();
+        }
+        
+        function addAxisLabels() {
+            // 在实际应用中，这里会添加文本标签
+            // 由于Three.js文本渲染复杂，这里用简单几何体代替
+            
+            // θ = 0 标记
+            const zeroMarker = new THREE.Mesh(
+                new THREE.SphereGeometry(0.5),
+                new THREE.MeshBasicMaterial({ color: 0xffffff })
+            );
+            zeroMarker.position.set(-15, 0, 0);
+            scene.add(zeroMarker);
+            
+            // θ = π/2 标记  
+            const piHalfMarker = new THREE.Mesh(
+                new THREE.SphereGeometry(0.5),
+                new THREE.MeshBasicMaterial({ color: 0xffff00 })
+            );
+            piHalfMarker.position.set(0, 0, 0);
+            scene.add(piHalfMarker);
+            
+            // θ = π 标记
+            const piMarker = new THREE.Mesh(
+                new THREE.SphereGeometry(0.5),
+                new THREE.MeshBasicMaterial({ color: 0xff0000 })
+            );
+            piMarker.position.set(15, 0, 0);
+            scene.add(piMarker);
+        }
+        
+        function createIntegralArea() {
+            // 创建可变的积分区域显示
+            const integralGeometry = new THREE.PlaneGeometry(30, 20, 100, 50);
+            const integralMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    functionType: { value: 0 }, // 0=sin, 1=sin², 2=cos
+                    integralRange: { value: 1 }, // 0=半球, 1=全球
+                    animationProgress: { value: 0 }
+                },
+                vertexShader: `
+                    uniform float time;
+                    uniform int functionType;
+                    uniform int integralRange;
+                    uniform float animationProgress;
+                    
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+                    varying float vFunctionValue;
+                    
+                    void main() {
+                        vPosition = position;
+                        vUv = uv;
+                        
+                        float theta = (uv.x - 0.5) * 3.14159; // -π/2 到 π/2，然后映射到 0 到 π
+                        theta = (theta + 1.5708) / 3.14159 * 3.14159; // 0 到 π
+                        
+                        float functionValue = 0.0;
+                        if (functionType == 0) { // sinθ
+                            functionValue = sin(theta);
+                        } else if (functionType == 1) { // sin²θ  
+                            functionValue = sin(theta) * sin(theta);
+                        } else if (functionType == 2) { // cosθ
+                            functionValue = cos(theta);
+                        }
+                        
+                        vFunctionValue = functionValue;
+                        
+                        vec3 pos = position;
+                        pos.y = functionValue * 10.0 * (uv.y * 0.5 + 0.5);
+                        pos.x = (uv.x - 0.5) * 30.0; // θ方向
+                        
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float animationProgress;
+                    
+                    varying vec3 vPosition;
+                    varying vec2 vUv;
+                    varying float vFunctionValue;
+                    
+                    void main() {
+                        float alpha = 0.6;
+                        
+                        // 基于函数值的颜色
+                        vec3 color = mix(
+                            vec3(0.2, 0.4, 1.0), // 蓝色
+                            vec3(1.0, 0.4, 0.2), // 橙色
+                            vFunctionValue
+                        );
+                        
+                        // 积分区域高亮
+                        float theta = (vUv.x - 0.5) * 3.14159 + 1.5708;
+                        if (theta <= animationProgress) {
+                            color *= 1.5;
+                            alpha *= 1.3;
+                        }
+                        
+                        gl_FragColor = vec4(color, alpha);
+                    }
+                `,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            
+            integralCurve = new THREE.Mesh(integralGeometry, integralMaterial);
+            scene.add(integralCurve);
+        }
+        
+        function createIntegralVisualization() {
+            // 这里创建实时的积分可视化效果
+            updateIntegralCurve();
+        }
+        
+        function setupLighting() {
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            directionalLight.position.set(30, 30, 30);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // 添加彩色点光源
+            const colorLights = [
+                { color: 0x00ffff, pos: [20, 10, 20] },
+                { color: 0xff6b35, pos: [-20, 10, -20] },
+                { color: 0xff00ff, pos: [0, 20, 0] }
+            ];
+            
+            colorLights.forEach(({ color, pos }) => {
+                const light = new THREE.PointLight(color, 0.8, 50);
+                light.position.set(...pos);
+                scene.add(light);
+            });
+        }
+        
+        function setupControls() {
+            // 鼠标控制
+            let mouseDown = false;
+            let mouseX = 0, mouseY = 0;
+            
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                mouseDown = true;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                mouseDown = false;
+            });
+            
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (!mouseDown) return;
+                
+                const deltaX = e.clientX - mouseX;
+                const deltaY = e.clientY - mouseY;
+                
+                const spherical = new THREE.Spherical();
+                spherical.setFromVector3(camera.position);
+                spherical.theta -= deltaX * 0.01;
+                spherical.phi += deltaY * 0.01;
+                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                
+                camera.position.setFromSpherical(spherical);
+                camera.lookAt(0, 0, 0);
+                
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            // 滚轮缩放
+            renderer.domElement.addEventListener('wheel', (e) => {
+                const scaleFactor = e.deltaY > 0 ? 1.1 : 0.9;
+                camera.position.multiplyScalar(scaleFactor);
+                camera.position.clampLength(10, 80);
+            });
+            
+            // 速度滑块
+            document.getElementById('speed-slider').addEventListener('input', (e) => {
+                animationSpeed = parseFloat(e.target.value);
+            });
+        }
+        
+        function animate() {
+            if (isAnimating) {
+                time += 0.016 * animationSpeed;
+                updateVisualization();
+                updateUI();
+                updateStepIndicator();
+            }
+            
+            renderer.render(scene, camera);
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function updateVisualization() {
+            if (integralCurve && integralCurve.material.uniforms) {
+                integralCurve.material.uniforms.time.value = time;
+                integralCurve.material.uniforms.animationProgress.value = (Math.sin(time * 0.8) + 1) * 0.5 * Math.PI;
+                
+                // 更新函数类型
+                let funcType = 0;
+                if (currentFunction === 'sin2') funcType = 1;
+                else if (currentFunction === 'cos') funcType = 2;
+                integralCurve.material.uniforms.functionType.value = funcType;
+                
+                // 更新积分范围
+                integralCurve.material.uniforms.integralRange.value = currentRange === 'full' ? 1 : 0;
+            }
+        }
+        
+        function updateUI() {
+            const progress = (Math.sin(time * 0.8) + 1) * 0.5;
+            const currentTheta = progress * Math.PI;
+            
+            let integralValue = 0;
+            if (currentFunction === 'sin') {
+                if (currentRange === 'full') {
+                    integralValue = 2 * progress; // ∫₀^(progress*π) sinθ dθ
+                } else {
+                    integralValue = Math.min(1, 2 * progress); // ∫₀^(progress*π/2) sinθ dθ
+                }
+            } else if (currentFunction === 'sin2') {
+                if (currentRange === 'full') {
+                    integralValue = (Math.PI / 2) * progress;
+                } else {
+                    integralValue = (Math.PI / 4) * progress;
+                }
+            } else if (currentFunction === 'cos') {
+                integralValue = Math.sin(currentTheta) - Math.sin(0);
+            }
+            
+            document.getElementById('current-integral').textContent = integralValue.toFixed(3);
+            
+            // 计算几何因子
+            let geometricFactor = 1;
+            if (currentFunction === 'sin') {
+                geometricFactor = 2 / 1; // 2÷1
+            } else if (currentFunction === 'sin2') {
+                geometricFactor = (Math.PI / 2) / (Math.PI / 4) * (8 / Math.PI) / 4; // 复杂计算简化
+            }
+            
+            document.getElementById('geometric-factor').textContent = geometricFactor.toFixed(3);
+        }
+        
+        function updateStepIndicator() {
+            const progress = (Math.sin(time * 0.8) + 1) * 0.5;
+            let step = Math.floor(progress * 4) + 1;
+            step = Math.max(1, Math.min(4, step));
+            
+            if (step !== currentStep) {
+                currentStep = step;
+                
+                // 更新步骤指示器
+                for (let i = 1; i <= 4; i++) {
+                    const stepEl = document.getElementById(`step${i}`);
+                    stepEl.className = i <= step ? 'step active' : 'step inactive';
+                }
+            }
+        }
+        
+        function updateIntegralCurve() {
+            // 更新积分曲线显示
+            if (integralCurve) {
+                const geometry = integralCurve.geometry;
+                const positions = geometry.attributes.position.array;
+                
+                for (let i = 0; i < positions.length; i += 3) {
+                    const x = positions[i];
+                    const theta = (x + 15) / 30 * Math.PI; // 映射到0-π
+                    
+                    let y = 0;
+                    if (currentFunction === 'sin') {
+                        y = Math.sin(theta) * 10;
+                    } else if (currentFunction === 'sin2') {
+                        y = Math.sin(theta) * Math.sin(theta) * 10;
+                    } else if (currentFunction === 'cos') {
+                        y = Math.cos(theta) * 10;
+                    }
+                    
+                    positions[i + 1] = y;
+                }
+                
+                geometry.attributes.position.needsUpdate = true;
+            }
+        }
+        
+        // 控制函数
+        function setIntegralRange(range) {
+            currentRange = range;
+            
+            // 更新按钮状态
+            document.getElementById('full-btn').classList.remove('active');
+            document.getElementById('half-btn').classList.remove('active');
+            document.getElementById(`${range}-btn`).classList.add('active');
+            
+            updateIntegralCurve();
+        }
+        
+        function setFunction(func) {
+            currentFunction = func;
+            
+            // 更新按钮状态
+            document.getElementById('sin-btn').classList.remove('active');
+            document.getElementById('sin2-btn').classList.remove('active');
+            document.getElementById('cos-btn').classList.remove('active');
+            document.getElementById(`${func}-btn`).classList.add('active');
+            
+            updateIntegralCurve();
+        }
+        
+        function toggleMode() {
+            // 切换2D/3D显示模式
+            const btn = document.getElementById('mode-btn');
+            if (btn.textContent === '3D模式') {
+                btn.textContent = '2D模式';
+                camera.position.set(0, 30, 0.1);
+                camera.lookAt(0, 0, 0);
+            } else {
+                btn.textContent = '3D模式';
+                camera.position.set(25, 15, 25);
+                camera.lookAt(0, 0, 0);
+            }
+        }
+        
+        function resetView() {
+            camera.position.set(25, 15, 25);
+            camera.lookAt(0, 0, 0);
+            time = 0;
+            document.getElementById('mode-btn').textContent = '3D模式';
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        window.addEventListener('resize', onWindowResize, false);
+        
+        // 启动可视化
+        init();
+        
+        // 定期更新分析内容
+        setInterval(updateAnalysisContent, 2000);
+        
+        function updateAnalysisContent() {
+            const progress = (Math.sin(time * 0.8) + 1) * 0.5;
+            
+            // 动态更新分析面板内容
+            const analysisSteps = [
+                "物理建模：空间以光速c发散",
+                "角度分析：sinθ权重分布",  
+                "积分计算：∫sinθ dθ = 2",
+                "因子推导：2÷1 = 2"
+            ];
+            
+            const currentStepText = analysisSteps[currentStep - 1] || analysisSteps[0];
+            
+            // 更新当前步骤显示
+            if (document.getElementById('current-step')) {
+                document.getElementById('current-step').textContent = `步骤${currentStep}: ${currentStepText}`;
+            }
+        }
+    </script>
+</body>
+</html>
