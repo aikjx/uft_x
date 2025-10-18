@@ -100,19 +100,42 @@ defineExpose({
 }
 
 .nav-container {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 640px) {
+  .nav-container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav-container {
+    padding: 0 2rem;
+  }
 }
 
 .nav-logo {
-  @apply flex items-center space-x-2 no-underline;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
 }
 
 .logo-content {
-  @apply flex items-center space-x-2;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .logo-icon {
-  @apply text-2xl;
+  font-size: 1.5rem;
 }
 
 .logo-text {
@@ -126,7 +149,15 @@ defineExpose({
 }
 
 .nav-links {
-  @apply hidden md:flex items-center space-x-8;
+  display: none;
+  align-items: center;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .nav-links {
+    display: flex;
+  }
 }
 
 .nav-link {
@@ -163,7 +194,9 @@ defineExpose({
 }
 
 .nav-actions {
-  @apply flex items-center space-x-4;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .theme-toggle {

@@ -25,9 +25,29 @@ const router = createRouter({
       component: () => import('../views/TestFormulaView.vue')
     },
     {
+      path: '/learning-path',
+      name: 'learning-path',
+      component: () => import('../views/LearningPathView.vue')
+    },
+    {
+      path: '/relationships',
+      name: 'relationships',
+      component: () => import('../views/RelationshipsView.vue')
+    },
+    {
+      path: '/unified-field',
+      name: 'unified-field',
+      component: () => import('../views/UnifiedFieldVisualization.vue')
+    },
+    {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue')
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../views/NotFoundView.vue')
     }
   ]
 })
