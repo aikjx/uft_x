@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>统一场论公式集 - 完整测试</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .status-bar {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .status-item {
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .status-item.loading {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-item.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-item.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-item .label {
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .status-item .value {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 20px;
+    }
+
+    .formula-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .formula-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .formula-card.success {
+      border-left: 4px solid #28a745;
+    }
+
+    .formula-card.error {
+      border-left: 4px solid #dc3545;
+    }
+
+    .formula-card.loading {
+      border-left: 4px solid #ffc107;
+    }
+
+    .formula-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .formula-id {
+      background: #667eea;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .formula-category {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .category-时空理论 {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .category-力学基础 {
+      background: #e8f5e9;
+      color: #388e3c;
+    }
+
+    .category-统一理论 {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+
+    .category-电磁理论 {
+      background: #fce4ec;
+      color: #c2185b;
+    }
+
+    .category-应用理论 {
+      background: #f3e5f5;
+      color: #7b1fa2;
+    }
+
+    .formula-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .formula-content {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: auto;
+    }
+
+    .formula-description {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .formula-status {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .formula-status.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .formula-status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .formula-status.loading {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .controls {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    @media (max-width: 768px) {
+      .formula-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🌌 统一场论公式集 - 完整测试</h1>
+      <p>测试所有 17 个公式的 MathJax 渲染</p>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-grid">
+        <div class="status-item loading" id="status-mathjax">
+          <div class="label">MathJax 状态</div>
+          <div class="value">⏳ 加载中</div>
+        </div>
+        <div class="status-item loading" id="status-total">
+          <div class="label">公式总数</div>
+          <div class="value">17</div>
+        </div>
+        <div class="status-item loading" id="status-success">
+          <div class="label">渲染成功</div>
+          <div class="value">0</div>
+        </div>
+        <div class="status-item loading" id="status-failed">
+          <div class="label">渲染失败</div>
+          <div class="value">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" onclick="renderAll()">🔄 重新渲染所有公式</button>
+      <button class="btn btn-success" onclick="clearAndRender()">🧹 清除并重新渲染</button>
+      <button class="btn btn-danger" onclick="location.reload()">🔃 刷新页面</button>
+    </div>
+
+    <div class="formula-grid" id="formula-grid"></div>
+  </div>
+
+  <script>
+    // 公式数据
+    const formulas = [
+      {
+        id: 1,
+        name: "时空同一化方程",
+        description: "描述时空的统一性，将时间和空间统一在一个方程中",
+        latex: "\\vec{r}(t) = \\vec{C}t = x\\vec{i} + y\\vec{j} + z\\vec{k}",
+        category: "时空理论"
+      },
+      {
+        id: 2,
+        name: "三维螺旋时空方程",
+        description: "描述三维空间中的螺旋时空结构",
+        latex: "\\vec{r}(t) = r\\cos(\\omega t) \\vec{i} + r\\sin(\\omega t) \\vec{j} + ht \\vec{k}",
+        category: "时空理论"
+      },
+      {
+        id: 3,
+        name: "质量定义方程",
+        description: "从空间密度变化角度重新定义质量",
+        latex: "m = k \\cdot \\frac{dn}{d\\Omega}",
+        category: "力学基础"
+      },
+      {
+        id: 4,
+        name: "引力场定义方程",
+        description: "将引力场表示为空间密度梯度",
+        latex: "\\vec{A} = -Gk \\frac{\\Delta n}{\\Delta s} \\frac{\\vec{r}}{r}",
+        category: "力学基础"
+      },
+      {
+        id: 5,
+        name: "静止动量方程",
+        description: "描述静止状态下的动量",
+        latex: "\\vec{p}_0 = m_0 \\vec{C}_0",
+        category: "力学基础"
+      },
+      {
+        id: 6,
+        name: "运动动量方程",
+        description: "描述运动状态下的广义动量",
+        latex: "\\vec{P} = m(\\vec{C} - \\vec{V})",
+        category: "力学基础"
+      },
+      {
+        id: 7,
+        name: "宇宙大统一方程（力方程）",
+        description: "统一描述宇宙中所有力的基本方程",
+        latex: "\\vec{F} = \\frac{d\\vec{P}}{dt} = \\vec{C}\\frac{dm}{dt} - \\vec{V}\\frac{dm}{dt} + m\\frac{d\\vec{C}}{dt} - m\\frac{d\\vec{V}}{dt}",
+        category: "统一理论"
+      },
+      {
+        id: 8,
+        name: "空间波动方程",
+        description: "描述空间的波动性质",
+        latex: "\\frac{\\partial^2 L}{\\partial x^2} + \\frac{\\partial^2 L}{\\partial y^2} + \\frac{\\partial^2 L}{\\partial z^2} = \\frac{1}{c^2} \\frac{\\partial^2 L}{\\partial t^2}",
+        category: "统一理论"
+      },
+      {
+        id: 9,
+        name: "电荷定义方程",
+        description: "从几何角度定义电荷",
+        latex: "q = k'k \\frac{1}{\\Omega^2} \\frac{d\\Omega}{dt}",
+        category: "电磁理论"
+      },
+      {
+        id: 10,
+        name: "电场定义方程",
+        description: "定义电场强度",
+        latex: "\\vec{E} = -\\frac{kk'}{4\\pi\\epsilon_0\\Omega^2}\\frac{d\\Omega}{dt}\\frac{\\vec{r}}{r^3}",
+        category: "电磁理论"
+      },
+      {
+        id: 11,
+        name: "磁场定义方程",
+        description: "定义磁场强度",
+        latex: "\\vec{B} = \\frac{\\mu_0 \\gamma kk'}{4\\pi\\Omega^2} \\frac{d\\Omega}{dt} \\frac{[(x-vt)\\vec{i} + y\\vec{j} + z\\vec{k}]}{[\\gamma^2(x-vt)^2 + y^2 + z^2]^{3/2}}",
+        category: "电磁理论"
+      },
+      {
+        id: 12,
+        name: "变化的引力场产生电磁场",
+        description: "描述引力场变化如何产生电磁场",
+        latex: "\\frac{\\partial^2\\vec{A}}{\\partial t^2} = \\frac{\\vec{V}}{f}(\\nabla \\cdot \\vec{E}) - \\frac{C^2}{f}(\\nabla \\times \\vec{B})",
+        category: "电磁理论"
+      },
+      {
+        id: 13,
+        name: "磁矢势方程",
+        description: "描述磁矢势与磁场的关系",
+        latex: "\\nabla \\times \\vec{A} = \\frac{\\vec{B}}{f}",
+        category: "电磁理论"
+      },
+      {
+        id: 14,
+        name: "变化的引力场产生电场",
+        description: "时变引力场能够诱导电场",
+        latex: "\\vec{E} = -f \\frac{d\\vec{A}}{dt}",
+        category: "电磁理论"
+      },
+      {
+        id: 15,
+        name: "变化的磁场产生引力场和电场",
+        description: "变化的磁场不仅产生电场，还能产生引力场效应",
+        latex: "\\frac{d\\vec{B}}{dt} = \\frac{-\\vec{A} \\times \\vec{E}}{c^2} - \\frac{\\vec{V}}{c^2} \\times \\frac{d\\vec{E}}{dt}",
+        category: "电磁理论"
+      },
+      {
+        id: 16,
+        name: "统一场论能量方程",
+        description: "质能关系的统一表达",
+        latex: "E = m_0c^2 = mc^2\\sqrt{1 - \\frac{v^2}{c^2}}",
+        category: "应用理论"
+      },
+      {
+        id: 17,
+        name: "光速飞行器动力学方程",
+        description: "描述接近光速运动的推进力方程",
+        latex: "\\vec{F} = (\\vec{C} - \\vec{V}) \\frac{dm}{dt}",
+        category: "应用理论"
+      }
+    ];
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    // 创建公式卡片
+    function createFormulaCard (formula) {
+      const card = document.createElement('div');
+      card.className = 'formula-card loading';
+      card.id = `formula-${formula.id}`;
+
+      card.innerHTML = `
+        <div class="formula-header">
+          <span class="formula-id">公式 ${formula.id}</span>
+          <span class="formula-category category-${formula.category}">${formula.category}</span>
+        </div>
+        <div class="formula-name">${formula.name}</div>
+        <div class="formula-content" id="content-${formula.id}">
+          \\[${formula.latex}\\]
+        </div>
+        <div class="formula-description">${formula.description}</div>
+        <div class="formula-status loading" id="status-${formula.id}">⏳ 渲染中...</div>
+      `;
+
+      return card;
+    }
+
+    // 初始化页面
+    function init () {
+      const grid = document.getElementById('formula-grid');
+      formulas.forEach(formula => {
+        grid.appendChild(createFormulaCard(formula));
+      });
+    }
+
+    // 更新状态
+    function updateStatus () {
+      document.getElementById('status-success').innerHTML = `
+        <div class="label">渲染成功</div>
+        <div class="value">${successCount}</div>
+      `;
+      document.getElementById('status-success').className = 'status-item ' + (successCount > 0 ? 'success' : 'loading');
+
+      document.getElementById('status-failed').innerHTML = `
+        <div class="label">渲染失败</div>
+        <div class="value">${failedCount}</div>
+      `;
+      document.getElementById('status-failed').className = 'status-item ' + (failedCount > 0 ? 'error' : 'success');
+    }
+
+    // 渲染单个公式
+    async function renderFormula (formula) {
+      const card = document.getElementById(`formula-${formula.id}`);
+      const content = document.getElementById(`content-${formula.id}`);
+      const status = document.getElementById(`status-${formula.id}`);
+
+      try {
+        await window.MathJax.typesetPromise([content]);
+
+        card.className = 'formula-card success';
+        status.className = 'formula-status success';
+        status.textContent = '✅ 渲染成功';
+        successCount++;
+
+        console.log(`✅ 公式 ${formula.id} 渲染成功`);
+      } catch (error) {
+        card.className = 'formula-card error';
+        status.className = 'formula-status error';
+        status.textContent = '❌ 渲染失败: ' + error.message;
+        failedCount++;
+
+        console.error(`❌ 公式 ${formula.id} 渲染失败:`, error);
+      }
+
+      updateStatus();
+    }
+
+    // 渲染所有公式
+    async function renderAll () {
+      if (!window.MathJax || !window.MathJax.typesetPromise) {
+        alert('MathJax 未加载，请等待或刷新页面');
+        return;
+      }
+
+      successCount = 0;
+      failedCount = 0;
+
+      console.log('🔄 开始渲染所有公式...');
+
+      for (const formula of formulas) {
+        await renderFormula(formula);
+      }
+
+      console.log(`✅ 渲染完成！成功: ${successCount}, 失败: ${failedCount}`);
+
+      if (failedCount === 0) {
+        alert(`🎉 所有 ${successCount} 个公式渲染成功！`);
+      } else {
+        alert(`⚠️ 渲染完成：成功 ${successCount} 个，失败 ${failedCount} 个`);
+      }
+    }
+
+    // 清除并重新渲染
+    async function clearAndRender () {
+      if (window.MathJax && window.MathJax.typesetClear) {
+        window.MathJax.typesetClear();
+      }
+      await renderAll();
+    }
+
+    // MathJax 配置
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']],
+        processEscapes: true,
+        macros: {
+          vec: ['\\overrightarrow{#1}', 1]
+        }
+      },
+      svg: {
+        scale: 1.2,
+        fontCache: 'global'
+      },
+      startup: {
+        pageReady: () => {
+          return window.MathJax.startup.defaultPageReady().then(() => {
+            console.log('✅ MathJax 加载成功');
+
+            document.getElementById('status-mathjax').className = 'status-item success';
+            document.getElementById('status-mathjax').innerHTML = `
+              <div class="label">MathJax 状态</div>
+              <div class="value">✅ 就绪</div>
+            `;
+
+            // 自动开始渲染
+            renderAll();
+          }).catch((err) => {
+            console.error('❌ MathJax 加载失败:', err);
+
+            document.getElementById('status-mathjax').className = 'status-item error';
+            document.getElementById('status-mathjax').innerHTML = `
+              <div class="label">MathJax 状态</div>
+              <div class="value">❌ 失败</div>
+            `;
+          });
+        }
+      }
+    };
+
+    // 页面加载时初始化
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</body>
+
+</html>
